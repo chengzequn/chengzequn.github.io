@@ -1,0 +1,28 @@
+title: 太极
+bio:  太极生两仪，两仪生四象
+baseurl: ""
+url: "https://blog.codetiler.com"
+repo: "chengzequn.github.io"                     #your_repo
+client_id: "166f3c53beedb40499e0" #your_clientID
+secret: "c329a22ed30fc370e70d644a63d609962ad8d17d"  #your_secrets
+owner: "chengzequn"            #your_tonycheng1995
+admin: ["chengzequn"]          #your_admin
+
+
+email: chengzequn@foxmail.com
+github: chengzequn
+weibo: 378995210      #your_weiboID
+
+markdown: kramdown
+
+#分页
+paginate: 10
+paginate_path: "/posts/page:num/"
+
+plugins:
+  - jekyll-feed           #文章提要
+  - jekyll-sitemap        #站点地图
+  - jekyll-gist
+  - jekyll-email-protect  #邮件混淆
+  - jekyll-seo-tag        #seo
+  - jekyll-paginate      #分页
