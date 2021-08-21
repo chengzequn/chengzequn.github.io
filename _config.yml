@@ -1,5 +1,5 @@
-title: 太极
-bio:  太极生两仪，两仪生四象
+title: 程泽群的博客
+bio:  Talk is cheap.Show me the code.
 baseurl: ""
 url: "https://blog.codetiler.com"
 repo: "chengzequn.github.io"                     #your_repo
@@ -11,7 +11,7 @@ admin: ["chengzequn"]          #your_admin
 
 email: chengzequn@foxmail.com
 github: chengzequn
-weibo: 378995210      #your_weiboID
+weibo: 5191968476      #your_weiboID
 
 markdown: kramdown
 
