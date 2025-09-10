@@ -1,0 +1,74 @@
+---
+layout: default
+---
+
+<div class="post-list-page">
+  {%- if page.title -%}
+    <h1 class="page-heading">{{ page.title }}</h1>
+  {%- endif -%}
+
+  {{ content }}
+
+  {%- if page.posts.size > 0 or site.posts.size > 0 -%}
+    <!-- 使用传入的posts变量，如果没有则使用所有文章 -->
+    {%- assign posts_to_display = page.posts | default: site.posts -%}
+    
+    <h2 class="post-list-heading">{{ page.list_title | default: "文章列表" }}</h2>
+    
+    {%- if posts_to_display.size > 0 -%}
+      <!-- 只有在使用全局文章列表时才使用分页 -->
+      {%- assign use_pagination = false -%}
+      {%- if posts_to_display == site.posts -%}
+        {%- assign use_pagination = true -%}
+        {%- assign posts_to_display = paginator.posts -%}
+      {%- endif -%}
+      <div class="post-list">
+        {%- for post in posts_to_display -%}
+          <article class="post-item">
+            <header class="post-item-header">
+              {%- assign date_format = site.minima.date_format | default: "%Y年%m月%d日" -%}
+              <span class="post-item-meta">{{ post.date | date: date_format }}</span>
+              <h3 class="post-item-title">
+                <a class="post-item-link" href="{{ post.url | relative_url }}">
+                  {{ post.title | escape }}
+                </a>
+              </h3>
+            </header>
+            
+            {%- if site.show_excerpts and post.excerpt -%}
+              <div class="post-item-excerpt">
+                {{ post.excerpt }}
+              </div>
+            {%- endif -%}
+            
+            {%- if post.categories.size > 0 -%}
+              <div class="post-item-categories">
+                {%- for category in post.categories -%}
+                  <a href="{{ site.baseurl }}/categories/#{{ category | slugify }}" class="category-link">
+                    {{ category }}
+                  </a>
+                {%- endfor -%}
+              </div>
+            {%- endif -%}
+          </article>
+        {%- endfor -%}
+      </div>
+    
+      {%- if posts_to_display.size == 0 -%}
+        <div class="no-posts">
+          <p>暂无文章</p>
+        </div>
+      {%- endif -%}
+    
+      <!-- 在使用全局文章列表时显示分页 -->
+      {%- if use_pagination -%}
+        {% include pagination.html %}
+      {%- endif -%}
+      
+      {%- if page.show_rss != false -%}
+        <p class="rss-subscribe">订阅 <a href="{{ "feed.xml" | relative_url }}">RSS</a></p>
+      {%- endif -%}
+    {%- endif -%}
+  {%- endif -%}
+
+</div>

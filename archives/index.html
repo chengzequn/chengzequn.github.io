@@ -1,0 +1,166 @@
+---
+layout: default
+title: 归档
+permalink: /archives/
+---
+
+<div class="archives-page">
+  <h1 class="page-heading">文章归档</h1>
+  <p class="archives-description">浏览网站上的所有文章，按时间顺序排列。</p>
+  
+  {% assign postsByYearMonth = site.posts | group_by_exp: "post", "post.date | date: '%Y年%m月'" %}
+  
+  {% if postsByYearMonth.size > 0 %}
+    <div class="archives-list">
+      {% for yearMonth in postsByYearMonth %}
+        {% assign postsByMonth = yearMonth.items | group_by_exp: "post", "post.date | date: '%m月'" %}
+        
+        {% for month in postsByMonth %}
+          {% assign year = yearMonth.name | split: '年' | first %}
+          {% assign monthName = month.name %}
+          
+          <div class="archive-section" id="{{ year }}-{{ monthName | remove: '月' }}">
+            <h2 class="archive-section-title">
+              <span class="archive-icon">📅</span>
+              {{ year }}年{{ monthName }}
+              <span class="archive-section-count">({{ month.items.size }})</span>
+            </h2>
+            
+            <ul class="archive-posts">
+              {% for post in month.items %}
+                <li class="archive-post-item">
+                  <a href="{{ post.url | relative_url }}" class="archive-post-link">
+                    <span class="archive-post-date">{{ post.date | date: "%d日" }}</span>
+                    <span class="archive-post-title">{{ post.title | escape }}</span>
+                    {% if post.categories.size > 0 %}
+                      <span class="archive-post-category">{{ post.categories | first }}</span>
+                    {% endif %}
+                  </a>
+                </li>
+              {% endfor %}
+            </ul>
+          </div>
+        {% endfor %}
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="no-archives">
+      <p>暂无文章</p>
+    </div>
+  {% endif %}
+</div>
+
+<style>
+/* 归档页面样式 */
+.archives-page {
+  background-color: $card-background;
+  border-radius: $radius-md;
+  box-shadow: 0 4px 12px $shadow-color;
+  padding: $spacing-xl;
+}
+
+.archives-description {
+  color: $text-secondary;
+  margin-bottom: $spacing-xl;
+  line-height: 1.6;
+}
+
+/* 归档区域样式 */
+.archives-list {
+  margin-top: $spacing-xl;
+}
+
+.archive-section {
+  margin-bottom: $spacing-xxl;
+  padding-bottom: $spacing-xl;
+  border-bottom: 1px solid $border-color;
+}
+
+.archive-section:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.archive-section-title {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  font-size: $font-size-xl;
+  font-weight: 600;
+  color: $primary-color;
+  margin-bottom: $spacing-lg;
+  position: relative;
+}
+
+.archive-icon {
+  font-size: $font-size-lg;
+}
+
+.archive-section-count {
+  font-size: $font-size-sm;
+  color: $secondary-color;
+  font-weight: normal;
+}
+
+/* 归档文章列表样式 */
+.archive-posts {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.archive-post-item {
+  margin-bottom: $spacing-md;
+  padding-bottom: $spacing-md;
+  border-bottom: 1px solid $light-gray;
+}
+
+.archive-post-item:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.archive-post-link {
+  display: flex;
+  align-items: center;
+  color: $text-color;
+  text-decoration: none;
+  transition: color 0.2s ease;
+  gap: $spacing-md;
+}
+
+.archive-post-link:hover {
+  color: $accent-color;
+}
+
+.archive-post-date {
+  font-size: $font-size-sm;
+  color: $secondary-color;
+  white-space: nowrap;
+  width: 50px;
+}
+
+.archive-post-title {
+  flex: 1;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.archive-post-category {
+  font-size: $font-size-xs;
+  background-color: $light-gray;
+  color: $secondary-color;
+  padding: $spacing-xxs $spacing-xs;
+  border-radius: $radius-full;
+  white-space: nowrap;
+}
+
+/* 无归档提示样式 */
+.no-archives {
+  text-align: center;
+  padding: $spacing-xxl;
+  color: $secondary-color;
+}
+</style>

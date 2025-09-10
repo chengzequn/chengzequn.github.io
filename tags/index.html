@@ -1,0 +1,232 @@
+---
+layout: default
+title: 标签
+permalink: /tags/
+---
+
+<div class="content-container">
+  <!-- 主要内容区域 -->
+  <div class="main-content">
+    <div class="tags-page">
+      <h1 class="page-heading">标签</h1>
+      <p class="tags-description">浏览网站上的所有标签，点击标签可以查看该标签下的所有文章。</p>
+      
+      {% if site.tags.size > 0 %}
+        <div class="tags-cloud">
+          <a href="#all" class="tag-cloud-link active">
+            <span class="tag-name">全部</span>
+            <span class="tag-count">({{ site.posts.size }})</span>
+          </a>
+          {% for tag in site.tags %}
+            <a href="#{{ tag[0] | slugify }}" class="tag-cloud-link">
+              <span class="tag-name">{{ tag[0] }}</span>
+              <span class="tag-count">({{ tag[1].size }})</span>
+            </a>
+          {% endfor %}
+        </div>
+        
+        <div class="tags-list">
+          <!-- 全部标签文章列表 -->
+          <div class="tag-section" id="all">
+            <h2 class="tag-section-title">
+              <span class="tag-icon">#</span>
+              全部
+              <span class="tag-section-count">({{ site.posts.size }})</span>
+            </h2>
+            
+            <ul class="tag-posts">
+              {% for post in site.posts %}
+                <li class="tag-post-item">
+                  <a href="{{ post.url | relative_url }}" class="tag-post-link">
+                    <span class="tag-post-date">{{ post.date | date: "%Y年%m月%d日" }}</span>
+                    <span class="tag-post-title">{{ post.title | escape }}</span>
+                  </a>
+                </li>
+              {% endfor %}
+            </ul>
+          </div>
+          
+          <!-- 各个标签文章列表 -->
+          {% for tag in site.tags %}
+            <div class="tag-section" id="{{ tag[0] | slugify }}">
+              <h2 class="tag-section-title">
+                <span class="tag-icon">#</span>
+                {{ tag[0] }}
+                <span class="tag-section-count">({{ tag[1].size }})</span>
+              </h2>
+              
+              <ul class="tag-posts">
+                {% for post in tag[1] %}
+                  <li class="tag-post-item">
+                    <a href="{{ post.url | relative_url }}" class="tag-post-link">
+                      <span class="tag-post-date">{{ post.date | date: "%Y年%m月%d日" }}</span>
+                      <span class="tag-post-title">{{ post.title | escape }}</span>
+                    </a>
+                  </li>
+                {% endfor %}
+              </ul>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="no-tags">
+          <p>暂无标签</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+  
+  <!-- 右侧栏 -->
+  <aside class="sidebar">
+    <!-- 根据配置动态渲染侧边栏模块 -->
+    {% if site.sidebar %}
+      {% for module in site.sidebar %}
+        {% assign module_key = module | default: '' %}
+        
+        {% case module_key %}
+          
+          {% when 'about' %}
+            <!-- 网站简介 -->
+            <section class="sidebar-section">
+              <h3 class="sidebar-title">关于本站</h3>
+              <div class="sidebar-content">
+                <p>这里记录了我的技术学习、项目经验和生活感悟。</p>
+              </div>
+            </section>
+            
+          {% when 'announcement' %}
+            <!-- 网站公告 -->
+            <section class="sidebar-section">
+              {% include announcement.html %}
+            </section>
+            
+          {% when 'word_count' %}
+            <!-- 文章字数统计 -->
+            <section class="sidebar-section">
+              <h3 class="sidebar-title">文章统计</h3>
+              {% include word_count.html %}
+            </section>
+            
+          {% when 'page_views' %}
+            <!-- 热度排行 -->
+            <section class="sidebar-section">
+              <h3 class="sidebar-title">热门文章</h3>
+              {% include page_views.html %}
+            </section>
+            
+          {% when 'wechat_official' %}
+            <!-- 微信公众号 -->
+            <section class="sidebar-section">
+              {% include wechat_official.html %}
+            </section>
+            
+          {% when 'categories' %}
+            <!-- 分类列表 -->
+            <section class="sidebar-section">
+              <h3 class="sidebar-title">文章分类</h3>
+              <ul class="category-list">
+                {% assign categories = site.categories | sort %}
+                {% for category in categories %}
+                  <li>
+                    <a href="{{ site.baseurl }}/categories/{{ category | first | slugify }}" class="category-item">
+                      {{ category | first }} <span class="category-count">({{ category | last | size }})</span>
+                    </a>
+                  </li>
+                {% endfor %}
+              </ul>
+            </section>
+            
+          {% when 'recent_posts' %}
+            <!-- 最近文章 -->
+            <section class="sidebar-section">
+              <h3 class="sidebar-title">最新文章</h3>
+              <ul class="recent-posts">
+                {% for post in site.posts limit:5 %}
+                  <li>
+                    <a href="{{ post.url }}" class="recent-post-link">{{ post.title }}</a>
+                    <span class="recent-post-date">{{ post.date | date: "%m-%d" }}</span>
+                  </li>
+                {% endfor %}
+              </ul>
+            </section>
+            
+          {% when 'social' %}
+            <!-- 社交媒体链接 -->
+            <section class="sidebar-section">
+              <h3 class="sidebar-title">关注我</h3>
+              <div class="social-links">
+                {% if site.social_links.github %}
+                  <a href="https://github.com/{{ site.social_links.github }}" target="_blank" rel="noopener noreferrer" class="social-link">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+                    </svg>
+                  </a>
+                {% endif %}
+              </div>
+            </section>
+            
+          {% when 'rss' %}
+            <!-- RSS订阅 -->
+            <section class="sidebar-section">
+              <h3 class="sidebar-title">订阅更新</h3>
+              <a href="{{ site.baseurl }}/feed.xml" class="rss-link" target="_blank" rel="noopener noreferrer">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M4 11a9 9 0 0 1 9 9"></path>
+                  <path d="M4 4a16 16 0 0 1 16 16"></path>
+                  <circle cx="5" cy="19" r="1"></circle>
+                </svg>
+                RSS订阅
+              </a>
+            </section>
+        {% endcase %}
+      {% endfor %}
+    {% endif %}
+  </aside>
+</div>
+
+<script>
+// 获取所有标签链接和标签部分
+const tagLinks = document.querySelectorAll('.tag-cloud-link');
+const tagSections = document.querySelectorAll('.tag-section');
+
+// 默认显示全部文章，并隐藏其他标签
+function showAllPosts() {
+  tagSections.forEach(section => {
+    section.style.display = section.id === 'all' ? 'block' : 'none';
+  });
+  
+  // 更新标签链接的激活状态
+  tagLinks.forEach(link => {
+    link.classList.toggle('active', link.getAttribute('href') === '#all');
+  });
+}
+
+// 初始显示全部文章
+showAllPosts();
+
+// 为每个标签链接添加点击事件
+for (const link of tagLinks) {
+  link.addEventListener('click', function(e) {
+    e.preventDefault();
+    
+    // 获取目标标签ID
+    const targetId = this.getAttribute('href').substring(1);
+    
+    // 显示选中的标签文章，隐藏其他标签
+    tagSections.forEach(section => {
+      section.style.display = section.id === targetId ? 'block' : 'none';
+    });
+    
+    // 更新标签链接的激活状态
+    tagLinks.forEach(link => {
+      link.classList.toggle('active', link.getAttribute('href').substring(1) === targetId);
+    });
+    
+    // 滚动到标签部分
+    const targetSection = document.getElementById(targetId);
+    if (targetSection) {
+      targetSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  });
+}
+</script>

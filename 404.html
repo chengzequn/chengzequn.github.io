@@ -1,0 +1,39 @@
+---
+permalink: /404.html
+layout: default
+---
+
+<style type="text/css" media="screen">
+  .container {
+    margin: 50px auto;
+    max-width: 800px;
+    text-align: center;
+  }
+  h1 {
+    margin: 30px 0;
+    font-size: 4em;
+    line-height: 1;
+    letter-spacing: -1px;
+  }
+  .back-home {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 10px 20px;
+    background-color: #0066cc;
+    color: white;
+    border-radius: 4px;
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+  }
+  .back-home:hover {
+    background-color: #0052a3;
+    text-decoration: none;
+  }
+</style>
+
+<div class="container">
+  <h1>404</h1>
+  <p><strong>页面未找到 :(</strong></p>
+  <p>抱歉，您请求的页面不存在或已被删除。</p>
+  <a href="{{ '/' | relative_url }}" class="back-home">返回首页</a>
+</div>

@@ -1,0 +1,114 @@
+<!-- Desktop Navigation -->
+<nav class="site-nav desktop-nav">
+  <div class="nav-container">
+    <!-- Left Section: Site Title -->
+    <div class="nav-left">
+      <a class="site-title tech-blue-gradient-text" rel="author" href="{{ "/" | relative_url }}">
+        <span class="logo-icon">⚡</span>
+        {{ site.title | escape }}
+      </a>
+    </div>
+    
+    <!-- Middle Section: Navigation Menu -->
+    <div class="nav-center">
+      <ul class="nav-links">
+        <li>
+          <a class="nav-link {% if page.url == "/" %}active{% endif %}" href="{{ "/" | relative_url }}">
+            主页
+            <span class="nav-link-underline"></span>
+          </a>
+        </li>
+        <li class="dropdown">
+          <a class="nav-link dropdown-toggle {% if page.url contains "posts" %}active{% endif %}" href="#" onclick="return false;">
+            文章
+            <span class="nav-link-underline"></span>
+          </a>
+          <ul class="dropdown-menu">
+            <li>
+              <a class="dropdown-link" href="{{ "/categories" | relative_url }}">分类</a>
+            </li>
+            <li>
+              <a class="dropdown-link" href="{{ "/tags" | relative_url }}">标签</a>
+            </li>
+            <li>
+              <a class="dropdown-link" href="{{ "/archives" | relative_url }}">归档</a>
+            </li>
+          </ul>
+        </li>
+        <li>
+          <a class="nav-link {% if page.url contains "about" %}active{% endif %}" href="{{ "/about" | relative_url }}">
+            我的
+            <span class="nav-link-underline"></span>
+          </a>
+        </li>
+      </ul>
+    </div>
+    
+    <!-- Right Section: Search and Theme Toggle -->
+    <div class="nav-right">
+      <!-- Search Button -->
+      <button class="search-button" aria-label="搜索">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+          <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+        </svg>
+      </button>
+      
+      <!-- Theme Toggle Button -->
+      <button class="theme-toggle" aria-label="换肤">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+          <path d="M8 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0zm0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13zm8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5zM3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8zm10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0zm-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0zm9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707zM4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708z"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+</nav>
+
+
+
+<!-- Mobile Navigation Menu -->
+<div class="mobile-nav-menu">
+  <ul class="mobile-nav-links">
+    {%- for path in page_paths -%}
+      {%- assign my_page = site.pages | where: "path", path | first -%}
+      {%- if my_page.title -%}
+        <li>
+          <a class="mobile-nav-link {% if page.url == my_page.url %}active{% endif %}" href="{{ my_page.url | relative_url }}">
+            {{ my_page.title | escape }}
+          </a>
+        </li>
+      {%- endif -%}
+    {%- endfor -%}
+    
+    <!-- Mobile Search -->
+    <li class="mobile-search">
+      <div class="search-container">
+        <input type="text" placeholder="搜索文章..." class="search-input"/>
+        <button class="search-icon-button">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
+            <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+          </svg>
+        </button>
+      </div>
+    </li>
+  </ul>
+</div>
+
+<!-- Header Scroll Effect Script -->
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const header = document.querySelector('.site-header');
+    let lastScrollTop = 0;
+    
+    window.addEventListener('scroll', function() {
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      
+      if (scrollTop > 50) {
+        header.classList.add('header-scrolled');
+      } else {
+        header.classList.remove('header-scrolled');
+      }
+      
+      lastScrollTop = scrollTop;
+    });
+  });
+</script>

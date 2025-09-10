@@ -1,0 +1,110 @@
+// Rouge 代码高亮样式 - 科技蓝主题
+
+.highlight {
+  background: #1e293b;
+  border-radius: 8px;
+  margin: 1.5rem 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.highlight pre {
+  background: transparent;
+  margin: 0;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 1.5rem;
+}
+
+.highlight pre::before {
+  display: none;
+}
+
+.highlight code {
+  background: transparent;
+  color: inherit;
+  padding: 0;
+}
+
+// 语法高亮颜色定义
+.highlight {
+  .hll { background-color: #374151; }
+  .c { color: #94a3b8; font-style: italic; } // Comment
+  .err { color: #f87171; } // Error
+  .k { color: #818cf8; font-weight: bold; } // Keyword
+  .o { color: #f87171; } // Operator
+  .ch { color: #94a3b8; font-style: italic; } // Comment.Hashbang
+  .cm { color: #94a3b8; font-style: italic; } // Comment.Multiline
+  .cp { color: #94a3b8; font-weight: bold; } // Comment.Preproc
+  .cpf { color: #94a3b8; font-style: italic; } // Comment.PreprocFile
+  .c1 { color: #94a3b8; font-style: italic; } // Comment.Single
+  .cs { color: #94a3b8; font-weight: bold; font-style: italic; } // Comment.Special
+  .gd { color: #f87171; } // Generic.Deleted
+  .ge { font-style: italic; } // Generic.Emph
+  .gr { color: #f87171; } // Generic.Error
+  .gh { color: #64748b; font-weight: bold; } // Generic.Heading
+  .gi { color: #34d399; } // Generic.Inserted
+  .go { color: #64748b; } // Generic.Output
+  .gp { color: #64748b; font-weight: bold; } // Generic.Prompt
+  .gs { font-weight: bold; } // Generic.Strong
+  .gu { color: #64748b; font-weight: bold; } // Generic.Subheading
+  .gt { color: #f87171; } // Generic.Traceback
+  .kc { color: #818cf8; font-weight: bold; } // Keyword.Constant
+  .kd { color: #818cf8; font-weight: bold; } // Keyword.Declaration
+  .kn { color: #f87171; font-weight: bold; } // Keyword.Namespace
+  .kp { color: #818cf8; font-weight: bold; } // Keyword.Pseudo
+  .kr { color: #818cf8; font-weight: bold; } // Keyword.Reserved
+  .kt { color: #818cf8; font-weight: bold; } // Keyword.Type
+  .m { color: #fbbf24; } // Literal.Number
+  .s { color: #34d399; } // Literal.String
+  .na { color: #60a5fa; } // Name.Attribute
+  .nb { color: #60a5fa; } // Name.Builtin
+  .nc { color: #60a5fa; font-weight: bold; } // Name.Class
+  .no { color: #60a5fa; } // Name.Constant
+  .nd { color: #60a5fa; } // Name.Decorator
+  .ni { color: #60a5fa; } // Name.Entity
+  .ne { color: #60a5fa; font-weight: bold; } // Name.Exception
+  .nf { color: #60a5fa; font-weight: bold; } // Name.Function
+  .nl { color: #60a5fa; } // Name.Label
+  .nn { color: #60a5fa; font-weight: bold; } // Name.Namespace
+  .nx { color: #60a5fa; } // Name.Other
+  .py { color: #60a5fa; } // Name.Property
+  .nt { color: #818cf8; font-weight: bold; } // Name.Tag
+  .nv { color: #60a5fa; } // Name.Variable
+  .ow { color: #f87171; font-weight: bold; } // Operator.Word
+  .w { color: #64748b; } // Text.Whitespace
+  .mb { color: #fbbf24; } // Literal.Number.Bin
+  .mf { color: #fbbf24; } // Literal.Number.Float
+  .mh { color: #fbbf24; } // Literal.Number.Hex
+  .mi { color: #fbbf24; } // Literal.Number.Integer
+  .mo { color: #fbbf24; } // Literal.Number.Oct
+  .sa { color: #34d399; } // Literal.String.Affix
+  .sb { color: #34d399; } // Literal.String.Backtick
+  .sc { color: #34d399; } // Literal.String.Char
+  .dl { color: #34d399; } // Literal.String.Delimiter
+  .sd { color: #34d399; font-style: italic; } // Literal.String.Doc
+  .s2 { color: #34d399; } // Literal.String.Double
+  .se { color: #34d399; font-weight: bold; } // Literal.String.Escape
+  .sh { color: #34d399; } // Literal.String.Heredoc
+  .si { color: #34d399; font-weight: bold; } // Literal.String.Interpol
+  .sx { color: #34d399; } // Literal.String.Other
+  .sr { color: #34d399; } // Literal.String.Regex
+  .s1 { color: #34d399; } // Literal.String.Single
+  .ss { color: #34d399; } // Literal.String.Symbol
+  .bp { color: #60a5fa; } // Name.Builtin.Pseudo
+  .fm { color: #60a5fa; font-weight: bold; } // Name.Function.Magic
+  .vc { color: #60a5fa; } // Name.Variable.Class
+  .vg { color: #60a5fa; } // Name.Variable.Global
+  .vi { color: #60a5fa; } // Name.Variable.Instance
+  .vm { color: #60a5fa; } // Name.Variable.Magic
+  .il { color: #fbbf24; } // Literal.Number.Integer.Long
+}
+
+// 暗色模式下的语法高亮样式
+@media (prefers-color-scheme: dark) {
+  .highlight {
+    background: #0f172a;
+    .hll { background-color: #1e293b; }
+  }
+}

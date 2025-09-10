@@ -1,0 +1,225 @@
+{% comment %}
+分页模块 - 为博客文章列表提供分页导航
+该模块支持上一页/下一页导航和页码显示功能
+{% endcomment %}
+
+{% if paginator.total_pages > 1 %}
+<div class="pagination-container">
+  <nav class="pagination" role="navigation">
+    <div class="pagination-content">
+      <!-- 上一页链接 -->
+      {% if paginator.previous_page %}
+        <a href="{{ paginator.previous_page_path | relative_url }}" class="pagination-previous" aria-label="上一页" data-page="{{ paginator.previous_page }}">
+          <svg class="pagination-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+          <span>上一页</span>
+        </a>
+      {% else %}
+        <span class="pagination-previous pagination-disabled" aria-disabled="true">
+          <svg class="pagination-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+          <span>上一页</span>
+        </span>
+      {% endif %}
+
+      <!-- 页码 -->
+      <div class="pagination-pages">
+        {% comment %} 显示第一页 {% endcomment %}
+        {% if paginator.page == 1 %}
+          <span class="pagination-page pagination-page-current" aria-current="page">{{ paginator.page }}</span>
+        {% else %}
+          <a href="{{ site.baseurl }}/" class="pagination-page" data-page="1">{{ 1 }}</a>
+        {% endif %}
+
+        {% comment %} 省略号1 - 当当前页离第一页较远时显示 {% endcomment %}
+        {% if paginator.page > 4 %}
+          <span class="pagination-ellipsis">...</span>
+        {% endif %}
+
+        {% comment %} 显示当前页附近的页码 {% endcomment %}
+        {% assign lower_limit = paginator.page | minus: 2 %}
+        {% assign upper_limit = paginator.page | plus: 2 %}
+        {% for page_num in (2..paginator.total_pages) %}
+          {% if page_num >= lower_limit and page_num <= upper_limit and page_num != 1 and page_num != paginator.total_pages %}
+            {% if page_num == paginator.page %}
+              <span class="pagination-page pagination-page-current" aria-current="page">{{ page_num }}</span>
+            {% else %}
+              {% assign page_path = site.paginate_path | replace: ':num', page_num | relative_url %}
+              <a href="{{ page_path }}" class="pagination-page" data-page="{{ page_num }}">{{ page_num }}</a>
+            {% endif %}
+          {% endif %}
+        {% endfor %}
+
+        {% comment %} 省略号2 - 当当前页离最后一页较远时显示 {% endcomment %}
+        {% if paginator.page < paginator.total_pages | minus: 3 %}
+          <span class="pagination-ellipsis">...</span>
+        {% endif %}
+
+        {% comment %} 显示最后一页 {% endcomment %}
+        {% if paginator.page != paginator.total_pages and paginator.total_pages > 1 %}
+          {% assign last_page_path = site.paginate_path | replace: ':num', paginator.total_pages | relative_url %}
+          <a href="{{ last_page_path }}" class="pagination-page" data-page="{{ paginator.total_pages }}">{{ paginator.total_pages }}</a>
+        {% endif %}
+      </div>
+
+      <!-- 下一页链接 -->
+      {% if paginator.next_page %}
+        <a href="{{ paginator.next_page_path | relative_url }}" class="pagination-next" aria-label="下一页" data-page="{{ paginator.next_page }}">
+          <span>下一页</span>
+          <svg class="pagination-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </a>
+      {% else %}
+        <span class="pagination-next pagination-disabled" aria-disabled="true">
+          <span>下一页</span>
+          <svg class="pagination-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </span>
+      {% endif %}
+    </div>
+  </nav>
+
+  <!-- 分页信息 -->
+  <div class="pagination-info">
+    <p>第 {{ paginator.page }} 页，共 {{ paginator.total_pages }} 页，总 {{ paginator.total_posts }} 篇文章</p>
+  </div>
+</div>
+
+<script>
+// 异步分页功能实现
+(function() {
+  // 为所有分页链接添加点击事件
+  document.querySelectorAll('.pagination a[data-page]').forEach(link => {
+    link.addEventListener('click', function(e) {
+      e.preventDefault(); // 阻止默认的页面跳转
+      const pageUrl = this.getAttribute('href');
+      const pageNumber = this.getAttribute('data-page');
+      loadPageContent(pageUrl, pageNumber);
+    });
+  });
+
+  // 异步加载页面内容
+  function loadPageContent(url, pageNumber) {
+    // 显示加载状态
+    const postList = document.querySelector('.post-list');
+    const paginationContainer = document.querySelector('.pagination-container');
+    
+    if (postList) {
+      const loadingIndicator = document.createElement('div');
+      loadingIndicator.className = 'pagination-loading';
+      loadingIndicator.innerHTML = '<div class="loading-spinner"></div><span>加载中...</span>';
+      
+      // 保存原始内容以便恢复（如果加载失败）
+      const originalContent = postList.innerHTML;
+      
+      // 替换为加载状态
+      postList.innerHTML = '';
+      postList.appendChild(loadingIndicator);
+
+      // 使用Fetch API加载新页面内容
+      fetch(url)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.text();
+        })
+        .then(html => {
+          // 解析加载的HTML内容
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(html, 'text/html');
+          
+          // 提取新的文章列表内容
+          const newPostList = doc.querySelector('.post-list');
+          const newPagination = doc.querySelector('.pagination-container');
+          
+          if (newPostList && newPagination) {
+            // 更新当前页面的文章列表
+            postList.innerHTML = newPostList.innerHTML;
+            
+            // 更新分页控件
+            if (paginationContainer) {
+              paginationContainer.parentNode.replaceChild(
+                newPagination, 
+                paginationContainer
+              );
+            }
+            
+            // 更新URL而不刷新页面
+            history.pushState({ page: pageNumber }, `第 ${pageNumber} 页`, url);
+            
+            // 滚动到文章列表顶部而不是页面顶部
+            const postListContainer = document.querySelector('.home-content');
+            if (postListContainer) {
+              postListContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+            
+            // 重新初始化异步分页功能（因为分页控件已被替换）
+            initAsyncPagination();
+          } else {
+            // 如果无法提取内容，恢复原始内容
+            postList.innerHTML = originalContent;
+            console.error('无法提取文章列表或分页控件');
+          }
+        })
+        .catch(error => {
+          console.error('加载页面内容失败:', error);
+          // 加载失败时恢复原始内容
+          postList.innerHTML = originalContent;
+        });
+    }
+  }
+
+  // 初始化异步分页功能
+  function initAsyncPagination() {
+    // 为新的分页链接添加点击事件
+    document.querySelectorAll('.pagination a[data-page]').forEach(link => {
+      link.addEventListener('click', function(e) {
+        e.preventDefault();
+        const pageUrl = this.getAttribute('href');
+        const pageNumber = this.getAttribute('data-page');
+        loadPageContent(pageUrl, pageNumber);
+      });
+    });
+  }
+
+  // 处理浏览器的前进/后退按钮
+  window.addEventListener('popstate', function(e) {
+    if (e.state && e.state.page) {
+      const pageNumber = e.state.page;
+      const url = pageNumber === '1' ? '/' : `/page${pageNumber}/`;
+      loadPageContent(url, pageNumber);
+    }
+  });
+
+  // 初始化时添加一些CSS样式
+  const style = document.createElement('style');
+  style.textContent = `
+    .pagination-loading {
+      text-align: center;
+      padding: 40px 0;
+      color: #666;
+    }
+    .loading-spinner {
+      display: inline-block;
+      width: 30px;
+      height: 30px;
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #3498db;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 15px;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  `;
+  document.head.appendChild(style);
+})();
+</script>
+{% endif %}

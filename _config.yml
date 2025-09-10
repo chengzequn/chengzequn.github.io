@@ -1,0 +1,114 @@
+# Welcome to Jekyll!
+#
+# This config file is meant for settings that affect your whole blog, values
+# which you are expected to set up once and rarely edit after that. If you find
+# yourself editing this file very often, consider using Jekyll's data files
+# feature for the data you need to update frequently.
+#
+# For technical reasons, this file is *NOT* reloaded automatically when you use
+# 'bundle exec jekyll serve'. If you change this file, please restart the server process.
+#
+# If you need help with YAML syntax, here are some quick references for you:
+# https://learn-the-web.algonquindesign.ca/topics/markdown-yaml-cheat-sheet/#yaml
+# https://learnxinyminutes.com/docs/yaml/
+#
+# Site settings
+# These are used to personalize your new site. If you look in the HTML files,
+# you will see them accessed via {{ site.title }}, {{ site.email }}, and so on.
+# You can create any custom variable you would like, and they will be accessible
+# in the templates via {{ site.myvariable }}.
+
+title: 程泽群的博客
+email: chengzequn@example.com
+description: >- # this means to ignore newlines until "baseurl:"  
+  记录生活与技术的点滴，分享学习心得与经验。
+baseurl: "" # the subpath of your site, e.g. /blog
+url: "https://chengzequn.github.io" # the base hostname & protocol for your site
+twitter_username: chengzequn
+github_username:  chengzequn
+
+# Build settings
+# 不使用外部主题，使用我们自定义的主题
+highlighter: rouge
+markdown: kramdown
+kramdown:
+  syntax_highlighter: rouge
+  syntax_highlighter_opts:
+    css_class: 'highlight'
+plugins:
+  - jekyll-feed
+  - jekyll-seo-tag
+  - jekyll-sitemap
+  - jekyll-paginate
+
+# 自定义主题设置
+author: 程泽群
+social_links:
+  github: chengzequn
+  twitter: chengzequn
+
+# SEO配置
+
+# 许可证配置
+license: CC BY-NC-SA 4.0
+license_url: https://creativecommons.org/licenses/by-nc-sa/4.0/
+license_description: 知识共享署名-非商业性使用-相同方式共享 4.0 国际许可协议
+default_image: "/assets/images/default-image.jpg" # 默认分享图片
+logo: "/assets/images/logo.png" # 网站logo
+
+social:
+  name: 程泽群
+  links:
+    - https://github.com/chengzequn
+    - https://twitter.com/chengzequn
+
+# 控制摘要显示
+show_excerpts: true
+
+# 分页设置
+paginate: 10 # 每页显示5篇文章
+paginate_path: '/page:num/' # 分页路径格式
+
+# Disqus评论配置
+# 如需启用评论功能，请取消注释并填写您的Disqus shortname
+# disqus:
+#   shortname: your-disqus-shortname
+
+# Exclude from processing.
+# The following items will not be processed, by default.
+# Any item listed under the `exclude:` key here will be automatically added to
+# the internal "default list".
+#
+# Excluded items can be processed by explicitly listing the directories or
+# their entries' file path in the `include:` list.
+#
+# exclude:
+#   - .sass-cache/
+#   - .jekyll-cache/
+#   - gemfiles/
+#   - Gemfile
+#   - Gemfile.lock
+#   - node_modules/
+#   - vendor/bundle/
+#   - vendor/cache/
+#   - vendor/gems/
+#   - vendor/ruby/
+
+# 侧边栏模块配置
+# 控制侧边栏各模块的显示与顺序
+# 列表中存在的模块名表示开启该模块，顺序即为显示顺序
+sidebar:
+  - about
+  - announcement
+  - word_count
+  - page_views
+  - wechat_official
+
+# 导航页面路径
+# 用于在移动导航菜单中显示的页面
+page_paths:
+  - index.html
+  - about.markdown
+  - all-posts.md
+  - archives/index.html
+  - categories/index.html

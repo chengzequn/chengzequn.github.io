@@ -1,0 +1,100 @@
+{% comment %}
+SEO模块 - 用于优化网站在搜索引擎和社交媒体中的展示
+基于jekyll-seo-tag插件实现
+{% endcomment %}
+
+{% if jekyll.environment == 'production' %}
+  {% comment %}生产环境下的SEO配置{% endcomment %}
+  
+  <!-- jekyll-seo-tag 插件生成的SEO元标签 -->
+  {% seo %}
+  
+  <!-- 自定义SEO元标签 -->
+  {% if page.seo_title %}
+    <meta property="og:title" content="{{ page.seo_title }}">
+    <meta name="twitter:title" content="{{ page.seo_title }}">
+  {% endif %}
+  
+  {% if page.seo_description %}
+    <meta name="description" content="{{ page.seo_description }}">
+    <meta property="og:description" content="{{ page.seo_description }}">
+    <meta name="twitter:description" content="{{ page.seo_description }}">
+  {% endif %}
+  
+  {% if page.image %}
+    <meta property="og:image" content="{{ page.image | absolute_url }}">
+    <meta name="twitter:image" content="{{ page.image | absolute_url }}">
+    <meta name="twitter:card" content="summary_large_image">
+  {% elsif site.logo %}
+    <meta property="og:image" content="{{ site.logo | absolute_url }}">
+    <meta name="twitter:image" content="{{ site.logo | absolute_url }}">
+    <meta name="twitter:card" content="summary">
+  {% endif %}
+  
+  {% if page.author %}
+    <meta name="author" content="{{ page.author }}">
+    <meta property="og:author" content="{{ page.author }}">
+  {% elsif site.author %}
+    <meta name="author" content="{{ site.author }}">
+    <meta property="og:author" content="{{ site.author }}">
+  {% endif %}
+  
+  {% if page.keywords %}
+    <meta name="keywords" content="{{ page.keywords | join: ', ' }}">
+  {% endif %}
+  
+  <!-- 网站结构数据 -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "{% if page.layout == 'post' %}BlogPosting{% elsif page.layout == 'page' %}WebPage{% else %}Website{% endif %}",
+    "headline": "{{ page.title | default: site.title }}",
+    "description": "{{ page.excerpt | default: site.description | strip_html | normalize_whitespace | truncate: 160 }}",
+    "url": "{{ page.url | absolute_url }}",
+    {% if site.author %}
+    "author": {
+      "@type": "Person",
+      "name": "{{ site.author }}"
+    },
+    {% endif %}
+    "datePublished": "{{ page.date | default: site.time }}",
+    {% if page.modified_date %}
+    "dateModified": "{{ page.modified_date }}",
+    {% endif %}
+    {% if page.image %}
+    "image": "{{ page.image | absolute_url }}",
+    {% elsif site.logo %}
+    "image": "{{ site.logo | absolute_url }}",
+    {% endif %}
+    {% if page.categories %}
+    "keywords": "{{ page.categories | join: ', ' }}",
+    {% endif %}
+    "publisher": {
+      "@type": "Organization",
+      "name": "{{ site.title }}",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "{{ site.logo | default: '/assets/images/logo.png' | absolute_url }}"
+      }
+    }
+  }
+  </script>
+  
+  <!-- 机器人指令 -->
+  {% if page.noindex %}
+    <meta name="robots" content="noindex, nofollow">
+  {% else %}
+    <meta name="robots" content="index, follow">
+  {% endif %}
+
+{% else %}
+  {% comment %}开发环境下的SEO配置 - 简化版{% endcomment %}
+  
+  <!-- 基本元标签 -->
+  <title>{% if page.title %}{{ page.title | escape }} - {{ site.title | escape }}{% else %}{{ site.title | escape }}{% endif %}</title>
+  <meta name="description" content="{{ page.excerpt | default: site.description | strip_html | normalize_whitespace | truncate: 160 }}">
+  
+  <!-- 开发环境提示 -->
+  <meta name="robots" content="noindex, nofollow">
+  
+{% endif %}

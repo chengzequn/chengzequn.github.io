@@ -1,0 +1,176 @@
+---
+layout: default
+title: 分类
+permalink: /categories/
+---
+
+<div class="categories-page">
+  <h1 class="page-heading">文章分类</h1>
+  <p class="categories-description">浏览网站上的所有文章分类，点击分类名称查看该分类下的所有文章。</p>
+  
+  {% assign sorted_categories = site.categories | sort %}
+  
+  {% if sorted_categories.size > 0 %}
+    <div class="categories-list">
+      {% for category in sorted_categories %}
+        {% assign category_name = category[0] %}
+        {% assign posts = category[1] %}
+        
+        <div class="category-section" id="{{ category_name | slugify }}">
+          <h2 class="category-section-title">
+            <span class="category-icon">📁</span>
+            {{ category_name }}
+            <span class="category-section-count">({{ posts.size }})</span>
+          </h2>
+          
+          <ul class="category-posts">
+            {% for post in posts %}
+              <li class="category-post-item">
+                <a href="{{ post.url | relative_url }}" class="category-post-link">
+                  <span class="category-post-date">{{ post.date | date: "%Y-%m-%d" }}</span>
+                  <span class="category-post-title">{{ post.title | escape }}</span>
+                  {% if post.tags.size > 0 %}
+                    <div class="category-post-tags">
+                      {% for tag in post.tags %}
+                        <span class="category-post-tag">{{ tag }}</span>
+                      {% endfor %}
+                    </div>
+                  {% endif %}
+                </a>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="no-categories">
+      <p>暂无分类</p>
+    </div>
+  {% endif %}
+</div>
+
+<style>
+/* 分类页面样式 */
+.categories-page {
+  background-color: $card-background;
+  border-radius: $radius-md;
+  box-shadow: 0 4px 12px $shadow-color;
+  padding: $spacing-xl;
+}
+
+.categories-description {
+  color: $text-secondary;
+  margin-bottom: $spacing-xl;
+  line-height: 1.6;
+}
+
+/* 分类区域样式 */
+.categories-list {
+  margin-top: $spacing-xl;
+}
+
+.category-section {
+  margin-bottom: $spacing-xxl;
+  padding-bottom: $spacing-xl;
+  border-bottom: 1px solid $border-color;
+}
+
+.category-section:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.category-section-title {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  font-size: $font-size-xl;
+  font-weight: 600;
+  color: $primary-color;
+  margin-bottom: $spacing-lg;
+  position: relative;
+}
+
+.category-icon {
+  font-size: $font-size-lg;
+}
+
+.category-section-count {
+  font-size: $font-size-sm;
+  color: $secondary-color;
+  font-weight: normal;
+}
+
+/* 分类文章列表样式 */
+.category-posts {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.category-post-item {
+  margin-bottom: $spacing-md;
+  padding-bottom: $spacing-md;
+  border-bottom: 1px solid $light-gray;
+}
+
+.category-post-item:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.category-post-link {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+  color: $text-color;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.category-post-link:hover {
+  color: $accent-color;
+}
+
+.category-post-link:hover .category-post-title {
+  color: $accent-color;
+}
+
+.category-post-date {
+  font-size: $font-size-sm;
+  color: $secondary-color;
+  white-space: nowrap;
+}
+
+.category-post-title {
+  font-weight: 500;
+  line-height: 1.4;
+  transition: color 0.2s ease;
+}
+
+.category-post-tags {
+  display: flex;
+  gap: $spacing-xs;
+  flex-wrap: wrap;
+  margin-top: $spacing-xxs;
+}
+
+.category-post-tag {
+  font-size: $font-size-xs;
+  background-color: $light-gray;
+  color: $secondary-color;
+  padding: $spacing-xxs $spacing-xs;
+  border-radius: $radius-full;
+  white-space: nowrap;
+}
+
+/* 无分类提示样式 */
+.no-categories {
+  text-align: center;
+  padding: $spacing-xxl;
+  color: $secondary-color;
+}
+</style>

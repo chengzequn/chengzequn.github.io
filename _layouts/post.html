@@ -1,0 +1,79 @@
+---
+layout: default
+---
+<div class="home-container">
+  <div class="main-content">
+    <div class="post-container">
+    <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">{{ page.title | escape }}</h1>
+    <p class="post-meta">
+      <time class="dt-published" datetime="{{ page.date | date_to_xmlschema }}"
+        itemprop="datePublished">{{ page.date | date: "%Y年%m月%d日" }}</time>
+      {% if page.author %}
+        • <span itemprop="author" itemscope itemtype="http://schema.org/Person"><span class="p-author h-card" itemprop="name">{{ page.author }}</span></span>
+      {% endif %}
+      
+      {% comment %}简单的字数统计实现{% endcomment %}
+      {% assign content_text = content | strip_html | remove: "\n" | remove: "\t" | remove: "&nbsp;" | remove: " " %}
+      {% assign word_count = content_text | size %}
+      
+      • 阅读时间: {{ word_count | divided_by: 500 | plus: 1 }} 分钟
+      • 字数: {{ word_count }}
+      • <span id="page-views-count"><i class="far fa-eye"></i> <span>--</span></span>
+    </p>
+    
+    <script>
+      // 页面加载后获取当前文章的阅读次数
+      window.addEventListener('load', function() {
+        // 获取当前文章URL
+        var postUrl = '{{ page.url }}';
+        // 获取URL的最后一部分作为文章标识
+        var postId = postUrl.split('/').filter(Boolean).join('-');
+        
+        // 尝试从localStorage获取阅读次数
+        var views = localStorage.getItem('post_views_' + postId);
+        if (views) {
+          // 增加一次阅读计数
+          views = parseInt(views) + 1;
+          localStorage.setItem('post_views_' + postId, views);
+          document.querySelector('#page-views-count span').textContent = views;
+        } else {
+          // 如果是首次访问，设置为1
+          localStorage.setItem('post_views_' + postId, 1);
+          document.querySelector('#page-views-count span').textContent = '1';
+        }
+      });
+    </script>
+    {% include tags.html %}
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    {{ content }}
+  </div>
+
+  {% include share.html %}
+
+  <div class="post-nav">
+    {% if page.previous %}
+      <a href="{{ page.previous.url }}" class="previous-post">{{ page.previous.title }}</a>
+    {% endif %}
+    {% if page.next %}
+      <a href="{{ page.next.url }}" class="next-post">{{ page.next.title }}</a>
+    {% endif %}
+  </div>
+
+  {% if site.disqus.shortname %}
+    {% include disqus_comments.html %}
+  {% endif %}
+
+  <a class="u-url" href="{{ page.url | relative_url }}" hidden></a>
+</article>
+    </div>
+  </div>
+  
+  <!-- 侧边栏区域 -->
+  {% include sidebar.html %}
+</div>
+</div>

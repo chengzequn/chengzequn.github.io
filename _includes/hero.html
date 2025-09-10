@@ -1,0 +1,88 @@
+<!-- Hero Section -->
+<section class="hero-section">
+  <div class="hero-container">
+    <!-- Background with Overlay -->
+    <div class="hero-bg">
+      <div class="hero-overlay"></div>
+      <img src="{{ "/assets/images/hero_bg.jpg" | relative_url }}" alt="Hero Background" class="hero-image"/>
+    </div>
+    
+    <!-- Hero Content -->
+    <div class="hero-content">
+      <div class="hero-text-container">
+        <h1 class="hero-title tech-blue-gradient-text">
+          探索科技的<span class="hero-highlight">无限可能</span>
+        </h1>
+        <p class="hero-subtitle">
+          分享前沿技术见解，探索创新解决方案，连接未来科技世界
+        </p>
+        
+        <!-- CTA Buttons -->
+        <div class="hero-cta-buttons">
+          <a href="{{ "/about" | relative_url }}" class="btn btn-primary">
+            了解更多
+            <svg xmlns="http://www.w3.org/2000/svg" class="btn-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M5 12h14M12 5l7 7-7 7"/>
+            </svg>
+          </a>
+          <a href="{{ "/jekyll/update/2025/09/09/welcome-to-jekyll.html" | relative_url }}" class="btn btn-secondary">
+            最新文章
+          </a>
+        </div>
+        
+        <!-- Stats -->
+        <div class="hero-stats">
+          <div class="stat-item">
+            <span class="stat-number">50+</span>
+            <span class="stat-label">技术文章</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-number">10k+</span>
+            <span class="stat-label">读者访问</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-number">24/7</span>
+            <span class="stat-label">持续更新</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Animated Elements -->
+    <div class="hero-animated-elements">
+      <div class="animated-element element-1"></div>
+      <div class="animated-element element-2"></div>
+      <div class="animated-element element-3"></div>
+    </div>
+  </div>
+</section>
+
+<!-- Hero Section Script -->
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Add animation on scroll
+    const heroSection = document.querySelector('.hero-section');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          heroSection.classList.add('hero-visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1 });
+    
+    observer.observe(heroSection);
+    
+    // Parallax effect for background
+    window.addEventListener('scroll', function() {
+      const scrollPosition = window.pageYOffset;
+      const heroBg = document.querySelector('.hero-image');
+      if (heroBg) {
+        heroBg.style.transform = `translateY(${scrollPosition * 0.4}px)`;
+      }
+    });
+  });
+</script>
+
+<!-- Star Animation Script -->
+<script src="{{ "/assets/js/star-animation.js" | relative_url }}"></script>

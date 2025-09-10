@@ -1,0 +1,179 @@
+<div class="reward-module">
+  <div class="reward-button" onclick="toggleRewardPanel()">
+    <i class="fas fa-coffee"></i> 打赏作者
+  </div>
+  
+  <div class="reward-panel" id="rewardPanel">
+    <div class="reward-content">
+      <div class="reward-header">
+        <h4>感谢您的支持！</h4>
+        <button class="close-button" onclick="toggleRewardPanel()">×</button>
+      </div>
+      
+      <div class="reward-qr-codes">
+        <div class="qr-code-item">
+          <img src="{{ site.baseurl }}/assets/images/reward/reward_weixinpay.jpg" alt="微信支付">
+          <p>微信支付</p>
+        </div>
+        
+        <div class="qr-code-item">
+          <img src="{{ site.baseurl }}/assets/images/reward/reward_ali_pay.jpg" alt="支付宝">
+          <p>支付宝</p>
+        </div>
+      </div>
+      
+      <p class="reward-tip">您的支持是我创作的动力，谢谢！</p>
+    </div>
+  </div>
+</div>
+
+<script>
+function toggleRewardPanel() {
+  const panel = document.getElementById('rewardPanel');
+  panel.classList.toggle('show');
+}
+
+// 点击面板外部关闭
+document.addEventListener('click', function(event) {
+  const panel = document.getElementById('rewardPanel');
+  const button = document.querySelector('.reward-button');
+  
+  if (!panel.contains(event.target) && event.target !== button && !button.contains(event.target)) {
+    panel.classList.remove('show');
+  }
+});
+</script>
+
+<style>
+.reward-module {
+  position: relative;
+  margin: 2rem 0;
+}
+
+.reward-button {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  background-color: #f5f5f5;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+}
+
+.reward-button:hover {
+  background-color: #e8e8e8;
+  border-color: #ccc;
+}
+
+.reward-panel {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.reward-panel.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+.reward-content {
+  background-color: white;
+  border-radius: 8px;
+  padding: 2rem;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.reward-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 1rem;
+}
+
+.reward-header h4 {
+  margin: 0;
+  color: #333;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #999;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.close-button:hover {
+  background-color: #f5f5f5;
+  color: #666;
+}
+
+.reward-qr-codes {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 1.5rem;
+}
+
+.qr-code-item {
+  text-align: center;
+}
+
+.qr-code-item img {
+  width: 150px;
+  height: 150px;
+  margin-bottom: 0.5rem;
+}
+
+.qr-code-item p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.reward-tip {
+  text-align: center;
+  color: #999;
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+/* 响应式设计 */
+@media (max-width: 480px) {
+  .reward-qr-codes {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .qr-code-item {
+    margin-bottom: 1rem;
+  }
+  
+  .qr-code-item img {
+    width: 120px;
+    height: 120px;
+  }
+}
+</style>

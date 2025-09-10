@@ -1,0 +1,29 @@
+{% if page.comments != false and jekyll.environment == "production" %}
+
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function () {
+      this.page.url = '{{ page.url | absolute_url }}';
+      this.page.identifier = '{{ page.url | absolute_url }}';
+    };
+
+    (function() {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://{{ site.disqus.shortname }}.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+{% elsif page.comments != false %}
+
+  <div class="disqus-preview">
+    <p class="disqus-message">评论系统已就绪。在生产环境中，您将看到Disqus评论框。</p>
+    <p class="disqus-instruction">如需启用评论功能，请在_config.yml中配置您的Disqus shortname：</p>
+    <pre class="disqus-config-example"># Disqus评论配置
+disqus:
+  shortname: your-disqus-shortname</pre>
+  </div>
+
+{% endif %}

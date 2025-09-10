@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+  {% include head.html %}
+
+  <body>
+
+    {% include header.html %}
+
+    <!-- Hero Section - Only show on home page -->
+    {% if page.layout == 'home' %}
+      {% include hero.html %}
+    {% endif %}
+
+    <main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <div class="content-container">
+          <!-- 主要内容区域 -->
+          <div class="main-content">
+            {{ content }}
+          </div>
+          
+          <!-- 侧边栏区域已在post.html和home.html中包含 -->
+        </div>
+      </div>
+    </main>
+
+    {% include footer.html %}
+
+  </body>
+
+</html>

@@ -1,0 +1,43 @@
+---
+layout: default
+---
+
+<div class="home-container">
+  <div class="main-content">
+    <div class="home-content">
+      {%- if page.title -%}
+        <h1 class="page-heading">{{ page.title }}</h1>
+      {%- endif -%}
+
+      {{ content }}
+
+      {%- if paginator.posts.size > 0 -%}
+        <h2 class="post-list-heading">{{ page.list_title | default: "文章列表" }}</h2>
+        <ul class="post-list">
+          {%- for post in paginator.posts -%}
+          <li>
+            {%- assign date_format = site.minima.date_format | default: "%Y年%m月%d日" -%}
+            <span class="post-meta">{{ post.date | date: date_format }}</span>
+            <h3>
+              <a class="post-link" href="{{ post.url | relative_url }}">
+                {{ post.title | escape }}
+              </a>
+            </h3>
+            {%- if site.show_excerpts -%}
+              {{ post.excerpt }}
+            {%- endif -%}
+          </li>
+          {%- endfor -%}
+        </ul>
+
+        <!-- 分页导航 -->
+        {% include pagination.html %}
+
+        <p class="rss-subscribe">订阅 <a href="{{ "feed.xml" | relative_url }}">RSS</a></p>
+      {%- endif -%}
+    </div>
+  </div>
+  
+  <!-- 侧边栏区域 -->
+  {% include sidebar.html %}
+</div>

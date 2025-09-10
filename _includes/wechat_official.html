@@ -1,0 +1,192 @@
+
+<h3 class="sidebar-title">微信公众号</h3>
+<div class="wechat-content">
+  <div class="wechat-qrcode-flip" onclick="showWechatPopup()">
+    <div class="wechat-qrcode-front">
+      <img src="{{ site.baseurl }}/assets/images/wechat/wechat_souyisou_1.png" alt="微信公众号二维码" class="wechat-qrcode">
+    </div>
+    <div class="wechat-qrcode-back">
+      <img src="{{ site.baseurl }}/assets/images/wechat/wechat_souyisou_2.png" alt="微信公众号二维码" class="wechat-qrcode">
+    </div>
+  </div>
+</div>
+
+
+<!-- 微信公众号大图弹窗 -->
+<div id="wechatPopup" class="wechat-popup" style="display: none;">
+  <div class="wechat-popup-content">
+    <button class="wechat-popup-close" onclick="closeWechatPopup()">×</button>
+    <img src="{{ site.baseurl }}/assets/images/wechat/wechat.jpg" alt="微信公众号高清二维码" class="wechat-popup-image">
+  </div>
+</div>
+
+<script>
+  // 显示微信公众号大图弹窗
+  function showWechatPopup() {
+    const popup = document.getElementById('wechatPopup');
+    popup.style.display = 'flex';
+    setTimeout(() => {
+      popup.classList.add('show');
+    }, 10);
+  }
+  
+  // 关闭微信公众号大图弹窗
+  function closeWechatPopup() {
+    const popup = document.getElementById('wechatPopup');
+    popup.classList.remove('show');
+    setTimeout(() => {
+      popup.style.display = 'none';
+    }, 300);
+  }
+  
+  // 点击弹窗外部关闭
+  document.addEventListener('click', function(event) {
+    const popup = document.getElementById('wechatPopup');
+    const flipContainer = document.querySelector('.wechat-qrcode-flip');
+    
+    if (popup && popup.style.display === 'flex' && !popup.querySelector('.wechat-popup-content').contains(event.target) && event.target !== flipContainer && !flipContainer.contains(event.target)) {
+      closeWechatPopup();
+    }
+  });
+  
+  // 按ESC键关闭弹窗
+  document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+      closeWechatPopup();
+    }
+  });
+</script>
+
+<style>
+  .wechat-official {
+    padding: 0.5rem;
+    margin: 0;
+    text-align: center;
+  }
+  
+  .wechat-qrcode-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  /* 图片翻转容器 */
+  .wechat-qrcode-flip {
+    position: relative;
+    width: 100%;
+    height: 100px;
+    perspective: 1000px;
+    cursor: pointer;
+  }
+  
+  .wechat-qrcode-front,
+  .wechat-qrcode-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    transition: transform 0.6s ease;
+  }
+  
+  .wechat-qrcode-front {
+    z-index: 2;
+    transform: rotateY(0deg);
+  }
+  
+  .wechat-qrcode-back {
+    transform: rotateY(180deg);
+  }
+  
+  .wechat-qrcode-flip:hover .wechat-qrcode-front {
+    transform: rotateY(180deg);
+  }
+  
+  .wechat-qrcode-flip:hover .wechat-qrcode-back {
+    transform: rotateY(0deg);
+  }
+  
+  .wechat-qrcode {
+    width: 100%;
+    border: none;
+    padding: 0;
+    background-color: transparent;
+  }
+  
+  /* 弹窗样式 */
+  .wechat-popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  
+  .wechat-popup.show {
+    opacity: 1;
+  }
+  
+  .wechat-popup-content {
+    background-color: white;
+    border-radius: 8px;
+    padding: 2rem;
+    text-align: center;
+    position: relative;
+    max-width: 90vw;
+    max-height: 90vh;
+    overflow: auto;
+  }
+  
+  .wechat-popup-close {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #999;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+  }
+  
+  .wechat-popup-close:hover {
+    background-color: #f5f5f5;
+    color: #666;
+  }
+  
+  .wechat-popup-image {
+    max-width: 100%;
+    max-height: 70vh;
+    margin-bottom: 1rem;
+  }
+  
+  /* 响应式设计 */
+  @media (max-width: 768px) {
+    .wechat-official {
+      padding: 1rem;
+    }
+    
+    .wechat-qrcode-flip {
+      width: 150px;
+      height: 150px;
+    }
+    
+    .wechat-popup-content {
+      padding: 1.5rem;
+      margin: 1rem;
+    }
+  }
+</style>
