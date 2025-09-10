@@ -184,18 +184,26 @@ $shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 
   flex-wrap: wrap;
   align-items: center;
   gap: $spacing-xs;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.post-tags::-webkit-scrollbar {
+  display: none;
 }
 
 .tags-title {
   color: $secondary-color;
   font-size: $font-size-sm;
   margin-right: $spacing-xs;
+  white-space: nowrap;
 }
 
 .tags-list {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: $spacing-xs;
+  flex-shrink: 0;
 }
 
 .tag-link {
@@ -432,7 +440,7 @@ body {
   border-radius: $radius-md;
   box-shadow: 0 4px 12px $shadow-color;
   padding: $spacing-xl;
-  max-width: 800px;
+  max-width: 1000px; // 增加文章容器的最大宽度
   margin: 0 auto;
 }
 
@@ -641,10 +649,6 @@ body {
   opacity: 0.8;
 }
 
-/* 标签区域样式 */
-.tags-list {
-  margin-top: $spacing-xxl;
-}
 
 .tag-section {
   margin-bottom: $spacing-xxl;
@@ -1554,6 +1558,13 @@ body {
 .post-content p {
   margin-bottom: 1.5rem;
   line-height: 1.8;
+}
+
+.post-content p img {
+  width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+  margin-bottom: 1.5rem;
 }
 
 /* 标题样式 - 科技感层级设计 */
@@ -3046,6 +3057,8 @@ footer::before {
   .post-content {
     padding: 16px;
   }
+
+
 
   .footer-columns {
     flex-direction: column;

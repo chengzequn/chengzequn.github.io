@@ -498,8 +498,60 @@ window.addEventListener('DOMContentLoaded', function() {
   // 搜索模态框功能
   setupSearchModal();
   
+  // 禁止文本复制功能
+  disableTextSelection();
+  
   // 监听暗色模式变化
   if (window.matchMedia) {
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', detectDarkMode);
   }
 });
+
+// 禁止文本复制功能
+function disableTextSelection() {
+  // 选择文章内容区域
+  const contentElements = document.querySelectorAll('.post-content, .post, .home-content');
+  
+  // 为每个内容区域添加禁止选择和复制的样式
+  contentElements.forEach(element => {
+    element.style.userSelect = 'none';
+    element.style.webkitUserSelect = 'none';
+    element.style.mozUserSelect = 'none';
+    element.style.msUserSelect = 'none';
+  });
+  
+  // 添加复制事件阻止
+  document.addEventListener('copy', function(e) {
+    // 检查复制的内容是否来自文章内容区域
+    const selection = window.getSelection();
+    if (selection.rangeCount > 0) {
+      const range = selection.getRangeAt(0);
+      const commonAncestor = range.commonAncestorContainer;
+      
+      // 如果复制的内容包含在我们想要保护的元素中，则阻止复制
+      const isInProtectedArea = contentElements.some(element => 
+        element.contains(commonAncestor) || element === commonAncestor
+      );
+      
+      if (isInProtectedArea) {
+        e.preventDefault();
+        
+        // 可选：显示提示信息
+        alert('本文禁止复制，请尊重原创内容');
+      }
+    }
+  });
+  
+  // 阻止右键菜单
+  document.addEventListener('contextmenu', function(e) {
+    // 只在内容区域阻止右键菜单
+    const target = e.target;
+    const isInProtectedArea = contentElements.some(element => 
+      element.contains(target) || element === target
+    );
+    
+    if (isInProtectedArea) {
+      e.preventDefault();
+    }
+  });
+}
