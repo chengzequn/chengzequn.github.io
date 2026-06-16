@@ -112,6 +112,7 @@ sidebar:
 page_paths:
   - index.html
   - about.markdown
+  - resume.html
   - all-posts.md
   - archives/index.html
   - categories/index.html

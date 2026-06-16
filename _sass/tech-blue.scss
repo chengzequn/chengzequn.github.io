@@ -331,6 +331,544 @@ body {
   padding: 2rem 0;
 }
 
+/* ========== 简历页面样式 ========== */
+.resume {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+  background: $card-background;
+  border-radius: $radius-md;
+  box-shadow: 0 4px 12px $shadow-color;
+}
+
+.resume-header {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 2px solid $accent-color;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.resume-avatar {
+  flex-shrink: 0;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, $accent-color, lighten($accent-color, 12%));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.avatar-initial {
+  font-size: 2rem;
+  font-weight: 700;
+  color: $white;
+}
+
+.avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.resume-header-info {
+  flex: 1;
+}
+
+.resume-name {
+  font-size: 2rem;
+  font-weight: 800;
+  color: $text-color;
+  margin: 0 0 0.25rem;
+}
+
+.resume-title-text {
+  font-size: 1.05rem;
+  color: $secondary-color;
+  margin: 0 0 0.75rem;
+}
+
+.resume-contact-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.25rem;
+}
+
+.resume-contact-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+  color: $secondary-color;
+}
+
+.resume-contact-item svg {
+  flex-shrink: 0;
+  color: $accent-color;
+}
+
+.resume-header-actions {
+  flex-shrink: 0;
+}
+
+.resume-btn-download {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1.25rem;
+  background: $accent-color;
+  color: $white;
+  border-radius: $radius-full;
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+
+  &:hover {
+    opacity: 0.85;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba($accent-color, 0.35);
+  }
+}
+
+.resume-body {
+  display: flex;
+  gap: 2.5rem;
+}
+
+.resume-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.resume-sidebar {
+  width: 260px;
+  flex-shrink: 0;
+}
+
+.resume-section {
+  margin-bottom: 2rem;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.resume-section-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: $text-color;
+  margin: 0 0 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid $accent-color;
+  position: relative;
+
+  &::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -2px;
+    width: 40px;
+    height: 2px;
+    background: $accent-color;
+  }
+}
+
+.resume-summary {
+  color: $text-secondary;
+  line-height: 1.8;
+  margin: 0;
+}
+
+/* 简历时间线 */
+.resume-timeline {
+  position: relative;
+  padding-left: 1.5rem;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 12px;
+    top: 0.4rem;
+    bottom: 0.4rem;
+    width: 2px;
+    background: $border-color;
+  }
+}
+
+.resume-timeline-item {
+  position: relative;
+  margin-bottom: 1.5rem;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.resume-timeline-marker {
+  position: absolute;
+  left: -16px;
+  top: 0.45rem;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: $accent-color;
+  border: 2px solid $white;
+  box-shadow: 0 0 0 2px $accent-color;
+  z-index: 1;
+}
+
+.resume-timeline-content {
+  padding-left: 0.5rem;
+}
+
+.resume-timeline-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.resume-job-title {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: $text-color;
+  margin: 0;
+}
+
+.resume-time {
+  font-size: 0.8rem;
+  color: $secondary-color;
+  white-space: nowrap;
+}
+
+.resume-company {
+  color: $accent-color;
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin: 0.15rem 0 0.5rem;
+}
+
+.resume-list {
+  margin: 0;
+  padding-left: 1.25rem;
+  list-style: disc;
+
+  li {
+    margin-bottom: 0.35rem;
+    color: $text-secondary;
+    font-size: 0.9rem;
+    line-height: 1.6;
+
+    &::marker {
+      color: $accent-color;
+    }
+  }
+}
+
+.resume-project {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px dashed $border-color;
+
+  &:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+  }
+}
+
+.resume-project-desc {
+  color: $text-secondary;
+  font-size: 0.88rem;
+  line-height: 1.7;
+  margin: 0.5rem 0 0.4rem;
+}
+
+.resume-project-tech {
+  font-size: 0.82rem;
+  color: $secondary-color;
+  margin: 0 0 0.6rem;
+}
+
+/* 侧边栏 */
+.resume-section-sidebar .resume-section-title {
+  font-size: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.resume-skill-group {
+  margin-bottom: 1rem;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.resume-skill-category {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: $text-color;
+  margin: 0 0 0.5rem;
+}
+
+.resume-skill-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.resume-skill-tag {
+  display: inline-block;
+  padding: 0.2rem 0.65rem;
+  background: $light-gray;
+  color: $text-secondary;
+  border-radius: $radius-full;
+  font-size: 0.78rem;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: $accent-color;
+    color: $white;
+  }
+}
+
+.resume-edu-item {
+  margin-bottom: 0.75rem;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.resume-edu-degree {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: $text-color;
+  margin: 0 0 0.15rem;
+}
+
+.resume-edu-school {
+  font-size: 0.85rem;
+  color: $accent-color;
+  margin: 0 0 0.15rem;
+}
+
+.resume-lang-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.35rem 0;
+
+  & + & {
+    border-top: 1px dashed $border-color;
+  }
+}
+
+.resume-lang-name {
+  font-size: 0.9rem;
+  color: $text-color;
+  font-weight: 500;
+}
+
+.resume-lang-level {
+  font-size: 0.8rem;
+  color: $secondary-color;
+}
+
+.resume-footer {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid $border-color;
+  text-align: center;
+
+  p {
+    color: $secondary-color;
+    font-size: 0.9rem;
+    margin: 0;
+  }
+}
+
+/* 打印优化 */
+@media print {
+  /* 全局强制打印背景色和边框，确保时间轴等元素可见 */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .site-header,
+  .site-footer,
+  .resume-header-actions,
+  .resume-btn-download {
+    display: none !important;
+  }
+
+  .page-content,
+  .wrapper,
+  .content-container,
+  .main-content {
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: none !important;
+  }
+
+  .resume {
+    box-shadow: none;
+    padding: 0 !important;
+    border-radius: 0;
+    max-width: none;
+    width: 100%;
+    margin: 0;
+  }
+
+  .resume-header {
+    padding: 1rem 2rem !important;
+  }
+
+  /* 标题下划线全宽，内容文字缩进 */
+  .resume-section {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+
+  .resume-section-title {
+    border-bottom-color: #3b82f6;
+
+    /* 隐藏叠加的 ::after 短装饰条，避免双线不同色 */
+    &::after {
+      display: none !important;
+    }
+  }
+
+  .resume-body {
+    flex-direction: column;
+  }
+  
+  .resume-sidebar {
+    width: 100%;
+  }
+
+  /* 时间轴竖线和圆点在打印时强制可见 */
+  .resume-timeline::before {
+    background: $text-color !important;
+  }
+
+  .resume-timeline-marker {
+    background: $accent-color !important;
+    border-color: $white !important;
+    box-shadow: 0 0 0 2px $accent-color !important;
+  }
+
+  .resume-header {
+    border-bottom-color: #3b82f6;
+  }
+
+  /* 去掉名字下的 h1::after 装饰下划线 */
+  .resume-name::after {
+    display: none !important;
+  }
+
+  .resume-project {
+    border-bottom-color: #3b82f6;
+  }
+
+  .resume-footer {
+    border-top-color: #3b82f6;
+  }
+
+  .resume-lang-item + .resume-lang-item {
+    border-top-color: #3b82f6;
+  }
+}
+
+/* 响应式 */
+@media (max-width: 768px) {
+  .resume-body {
+    flex-direction: column;
+  }
+
+  .resume-sidebar {
+    width: 100%;
+  }
+
+  .resume-header {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .resume-contact-row {
+    justify-content: center;
+  }
+
+  .resume-timeline-header {
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+}
+
+/* 深色模式 */
+@media (prefers-color-scheme: dark) {
+  .resume { background: #2d3748; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); }
+  .resume-name { color: #e2e8f0; }
+  .resume-title-text { color: #94a3b8; }
+  .resume-contact-item { color: #94a3b8; }
+  .resume-section-title { color: #e2e8f0; }
+  .resume-summary { color: #cbd5e1; }
+  .resume-job-title { color: #e2e8f0; }
+  .resume-time { color: #94a3b8; }
+  .resume-company { color: #63b3ed; }
+  .resume-list li { color: #cbd5e1; }
+  .resume-skill-category { color: #e2e8f0; }
+  .resume-skill-tag { background: #4a5568; color: #cbd5e1; }
+  .resume-skill-tag:hover { background: #63b3ed; color: #fff; }
+  .resume-edu-degree { color: #e2e8f0; }
+  .resume-edu-school { color: #63b3ed; }
+  .resume-lang-name { color: #e2e8f0; }
+  .resume-lang-level { color: #94a3b8; }
+  .resume-lang-item + .resume-lang-item { border-top-color: #4a5568; }
+  .resume-timeline::before { background: #4a5568; }
+  .resume-timeline-marker { border-color: #2d3748; }
+  .resume-footer { border-top-color: #4a5568; }
+  .resume-footer p { color: #94a3b8; }
+  .resume-project-desc { color: #cbd5e1; }
+  .resume-project-tech { color: #94a3b8; }
+  .resume-project { border-bottom-color: #4a5568; }
+}
+
+/* ========== 简历页面样式结束 ========== */
+
+/* 关于页面的简历入口按钮 */
+.about-resume-wrapper {
+  margin-bottom: 1.5rem;
+}
+
+.about-resume-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.5rem;
+  background: $accent-color;
+  color: $white;
+  border-radius: $radius-full;
+  text-decoration: none;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background: darken($accent-color, 8%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba($accent-color, 0.35);
+  }
+}
+
 /* 内容容器样式 */
 .content-container {
   display: flex;
