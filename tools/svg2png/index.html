@@ -1,0 +1,353 @@
+---
+layout: default
+title: SVG 转 PNG
+permalink: /tools/svg2png/
+---
+
+<article class="page h-entry">
+  <header class="page-header">
+    <a class="tool-back-link" href="{{ '/tools' | relative_url }}">← 返回工具集</a>
+    <h1 class="page-title p-name">SVG 转 PNG</h1>
+  </header>
+
+  <div class="tool-container">
+    <!-- 输入选择 -->
+    <div class="tool-input-tabs">
+      <button class="tool-tab active" data-tab="upload">上传文件</button>
+      <button class="tool-tab" data-tab="paste">粘贴代码</button>
+    </div>
+
+    <!-- 上传区 -->
+    <div class="tool-input-panel" id="panelUpload">
+      <div class="tool-upload-zone" id="uploadZone">
+        <div class="tool-upload-icon">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="17 8 12 3 7 8"/>
+            <line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
+        </div>
+        <p class="tool-upload-text">拖拽 SVG 文件到此处，或点击上传</p>
+        <p class="tool-upload-hint">支持 .svg 文件</p>
+        <input type="file" id="fileInput" accept=".svg" hidden>
+      </div>
+    </div>
+
+    <!-- 粘贴区 -->
+    <div class="tool-input-panel" id="panelPaste" style="display:none;">
+      <textarea class="tool-code-textarea" id="svgCodeInput" placeholder="在此粘贴 SVG 代码..."></textarea>
+      <div class="tool-actions" style="margin-top:0.75rem;">
+        <button class="tool-btn tool-btn-primary" id="loadCodeBtn">加载 SVG</button>
+      </div>
+    </div>
+
+    <!-- 操作区（加载后显示） -->
+    <div class="tool-workspace" id="workspace" style="display:none;">
+      <div class="tool-workspace-header">
+        <button class="tool-btn" id="reuploadBtn">← 重新上传 / 粘贴</button>
+      </div>
+      <!-- 颜色修改 -->
+      <div class="tool-panel">
+        <h3 class="tool-panel-title">颜色设置</h3>
+
+        <div class="tool-color-row">
+          <label class="tool-color-label">
+            <span>填充色</span>
+            <div class="tool-color-picker-wrap">
+              <input type="color" id="fillColor" value="#3b82f6">
+              <input type="text" id="fillColorText" value="#3b82f6" maxlength="7">
+            </div>
+          </label>
+          <label class="tool-color-label">
+            <span>描边色</span>
+            <div class="tool-color-picker-wrap">
+              <input type="color" id="strokeColor" value="#1e293b">
+              <input type="text" id="strokeColorText" value="#1e293b" maxlength="7">
+            </div>
+          </label>
+          <label class="tool-color-label">
+            <span>背景色</span>
+            <div class="tool-color-picker-wrap">
+              <input type="color" id="bgColor" value="#ffffff">
+              <input type="text" id="bgColorText" value="#ffffff" maxlength="7">
+            </div>
+          </label>
+        </div>
+
+        <div class="tool-check-row">
+          <label class="tool-checkbox">
+            <input type="checkbox" id="transparentBg" checked>
+            <span>透明背景</span>
+          </label>
+        </div>
+
+        <div class="tool-actions">
+          <button class="tool-btn tool-btn-primary" id="applyColor">应用颜色</button>
+          <button class="tool-btn" id="resetColor">重置颜色</button>
+        </div>
+      </div>
+
+      <!-- 预览区 -->
+      <div class="tool-panel">
+        <h3 class="tool-panel-title">预览</h3>
+        <div class="tool-preview-area" id="previewArea">
+          <div class="tool-preview-svg" id="svgPreview"></div>
+        </div>
+        <div class="tool-meta">
+          <span id="svgInfo"></span>
+        </div>
+      </div>
+
+      <!-- 导出 -->
+      <div class="tool-panel">
+        <h3 class="tool-panel-title">导出</h3>
+        <div class="tool-export-row">
+          <div class="tool-export-size">
+            <label>宽度 <input type="number" id="exportWidth" min="1" max="4096" value="512"></label>
+            <span class="tool-export-unit">px</span>
+            <label>高度 <input type="number" id="exportHeight" min="1" max="4096" value="512"></label>
+            <span class="tool-export-unit">px</span>
+            <button class="tool-btn" id="lockRatio" title="锁定宽高比">🔗</button>
+          </div>
+          <button class="tool-btn tool-btn-primary" id="downloadBtn">下载 PNG</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</article>
+
+<script>
+(function() {
+  var uploadZone = document.getElementById('uploadZone');
+  var fileInput = document.getElementById('fileInput');
+  var svgCodeInput = document.getElementById('svgCodeInput');
+  var workspace = document.getElementById('workspace');
+  var svgPreview = document.getElementById('svgPreview');
+  var svgInfo = document.getElementById('svgInfo');
+  var previewArea = document.getElementById('previewArea');
+
+  var fillColor = document.getElementById('fillColor');
+  var fillColorText = document.getElementById('fillColorText');
+  var strokeColor = document.getElementById('strokeColor');
+  var strokeColorText = document.getElementById('strokeColorText');
+  var bgColor = document.getElementById('bgColor');
+  var bgColorText = document.getElementById('bgColorText');
+  var transparentBg = document.getElementById('transparentBg');
+
+  var exportWidth = document.getElementById('exportWidth');
+  var exportHeight = document.getElementById('exportHeight');
+  var lockRatio = document.getElementById('lockRatio');
+
+  var originalSvgText = '';
+  var currentSvgText = '';
+  var originalWidth = 0;
+  var originalHeight = 0;
+  var aspectRatio = 1;
+  var locked = true;
+
+  // --- Tab 切换 ---
+  document.querySelectorAll('.tool-tab').forEach(function(tab) {
+    tab.addEventListener('click', function() {
+      document.querySelectorAll('.tool-tab').forEach(function(t) { t.classList.remove('active'); });
+      tab.classList.add('active');
+      var target = tab.dataset.tab;
+      document.getElementById('panelUpload').style.display = target === 'upload' ? 'block' : 'none';
+      document.getElementById('panelPaste').style.display = target === 'paste' ? 'block' : 'none';
+    });
+  });
+
+  // --- 重新上传 ---
+  function resetUI() {
+    workspace.style.display = 'none';
+    document.querySelector('.tool-input-tabs').style.display = 'flex';
+    // 重置到上传 tab
+    document.querySelectorAll('.tool-tab').forEach(function(t) { t.classList.remove('active'); });
+    document.querySelector('.tool-tab[data-tab="upload"]').classList.add('active');
+    document.getElementById('panelUpload').style.display = 'block';
+    document.getElementById('panelPaste').style.display = 'none';
+    svgCodeInput.value = '';
+    fileInput.value = '';
+    originalSvgText = '';
+    currentSvgText = '';
+  }
+
+  document.getElementById('reuploadBtn').addEventListener('click', resetUI);
+
+  // --- 上传 ---
+  uploadZone.addEventListener('click', function() { fileInput.click(); });
+  fileInput.addEventListener('change', function(e) { handleFile(e.target.files[0]); });
+
+  uploadZone.addEventListener('dragover', function(e) {
+    e.preventDefault();
+    uploadZone.classList.add('tool-upload-zone--active');
+  });
+  uploadZone.addEventListener('dragleave', function() {
+    uploadZone.classList.remove('tool-upload-zone--active');
+  });
+  uploadZone.addEventListener('drop', function(e) {
+    e.preventDefault();
+    uploadZone.classList.remove('tool-upload-zone--active');
+    var file = e.dataTransfer.files[0];
+    if (file && file.type === 'image/svg+xml') handleFile(file);
+  });
+
+  function handleFile(file) {
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      loadSvg(e.target.result);
+    };
+    reader.readAsText(file);
+  }
+
+  // --- 粘贴代码 ---
+  document.getElementById('loadCodeBtn').addEventListener('click', function() {
+    var code = svgCodeInput.value.trim();
+    if (!code) return;
+    loadSvg(code);
+  });
+
+  // --- 通用加载 ---
+  function loadSvg(svgText) {
+    originalSvgText = svgText;
+    currentSvgText = svgText;
+    parseSvg(svgText);
+    document.getElementById('panelUpload').style.display = 'none';
+    document.getElementById('panelPaste').style.display = 'none';
+    document.querySelector('.tool-input-tabs').style.display = 'none';
+    workspace.style.display = 'flex';
+  }
+
+  // --- 解析 SVG ---
+  function parseSvg(svgText) {
+    var parser = new DOMParser();
+    var doc = parser.parseFromString(svgText, 'image/svg+xml');
+    var svgEl = doc.querySelector('svg');
+    if (!svgEl) return;
+
+    var vw = parseFloat(svgEl.getAttribute('width')) || parseFloat(svgEl.getAttribute('viewBox') && svgEl.getAttribute('viewBox').split(/\s+/)[2]) || 512;
+    var vh = parseFloat(svgEl.getAttribute('height')) || parseFloat(svgEl.getAttribute('viewBox') && svgEl.getAttribute('viewBox').split(/\s+/)[3]) || 512;
+    originalWidth = vw || 512;
+    originalHeight = vh || 512;
+    aspectRatio = originalWidth / originalHeight;
+
+    exportWidth.value = Math.round(originalWidth);
+    exportHeight.value = Math.round(originalHeight);
+
+    svgInfo.textContent = '原始尺寸: ' + Math.round(originalWidth) + ' × ' + Math.round(originalHeight) + ' px';
+    renderPreview();
+  }
+
+  // --- 渲染预览 ---
+  function renderPreview() {
+    var blob = new Blob([currentSvgText], { type: 'image/svg+xml;charset=utf-8' });
+    var url = URL.createObjectURL(blob);
+    var img = new Image();
+    img.onload = function() {
+      svgPreview.innerHTML = '';
+      svgPreview.appendChild(img);
+      img.style.maxWidth = '100%';
+      img.style.maxHeight = '400px';
+      URL.revokeObjectURL(url);
+    };
+    img.src = url;
+  }
+
+  // --- 颜色修改 ---
+  function modifyColors(svgText, fill, stroke) {
+    var parser = new DOMParser();
+    var doc = parser.parseFromString(svgText, 'image/svg+xml');
+    var all = doc.querySelectorAll('*');
+
+    all.forEach(function(el) {
+      if (fill && el.hasAttribute('fill') && el.getAttribute('fill') !== 'none') {
+        el.setAttribute('fill', fill);
+      }
+      if (stroke && el.hasAttribute('stroke') && el.getAttribute('stroke') !== 'none') {
+        el.setAttribute('stroke', stroke);
+      }
+    });
+
+    return new XMLSerializer().serializeToString(doc);
+  }
+
+  document.getElementById('applyColor').addEventListener('click', function() {
+    currentSvgText = modifyColors(originalSvgText, fillColor.value, strokeColor.value);
+    renderPreview();
+  });
+
+  document.getElementById('resetColor').addEventListener('click', function() {
+    currentSvgText = originalSvgText;
+    fillColor.value = '#3b82f6';
+    fillColorText.value = '#3b82f6';
+    strokeColor.value = '#1e293b';
+    strokeColorText.value = '#1e293b';
+    renderPreview();
+  });
+
+  // --- 颜色双向同步 ---
+  fillColor.addEventListener('input', function() { fillColorText.value = fillColor.value; });
+  fillColorText.addEventListener('input', function() { if (/^#[0-9a-fA-F]{6}$/.test(fillColorText.value)) fillColor.value = fillColorText.value; });
+  strokeColor.addEventListener('input', function() { strokeColorText.value = strokeColor.value; });
+  strokeColorText.addEventListener('input', function() { if (/^#[0-9a-fA-F]{6}$/.test(strokeColorText.value)) strokeColor.value = strokeColorText.value; });
+  bgColor.addEventListener('input', function() { bgColorText.value = bgColor.value; });
+  bgColorText.addEventListener('input', function() { if (/^#[0-9a-fA-F]{6}$/.test(bgColorText.value)) bgColor.value = bgColorText.value; });
+
+  // --- 透明背景切换 ---
+  transparentBg.addEventListener('change', function() {
+    bgColor.disabled = transparentBg.checked;
+    bgColorText.disabled = transparentBg.checked;
+  });
+
+  // --- 尺寸联动 ---
+  exportWidth.addEventListener('input', function() {
+    if (locked) exportHeight.value = Math.round(exportWidth.value / aspectRatio);
+  });
+  exportHeight.addEventListener('input', function() {
+    if (locked) exportWidth.value = Math.round(exportHeight.value * aspectRatio);
+  });
+
+  lockRatio.addEventListener('click', function() {
+    locked = !locked;
+    lockRatio.textContent = locked ? '🔗' : '🔓';
+  });
+
+  // --- 导出 PNG ---
+  document.getElementById('downloadBtn').addEventListener('click', function() {
+    var w = parseInt(exportWidth.value) || 512;
+    var h = parseInt(exportHeight.value) || 512;
+    var hasBg = !transparentBg.checked;
+    var bg = bgColor.value;
+
+    var canvas = document.createElement('canvas');
+    canvas.width = w;
+    canvas.height = h;
+    var ctx = canvas.getContext('2d');
+
+    if (hasBg) {
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, w, h);
+    }
+
+    var blob = new Blob([currentSvgText], { type: 'image/svg+xml;charset=utf-8' });
+    var url = URL.createObjectURL(blob);
+    var img = new Image();
+    img.onload = function() {
+      ctx.drawImage(img, 0, 0, w, h);
+      URL.revokeObjectURL(url);
+
+      canvas.toBlob(function(pngBlob) {
+        var downloadUrl = URL.createObjectURL(pngBlob);
+        var a = document.createElement('a');
+        a.href = downloadUrl;
+        a.download = 'converted.png';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(downloadUrl);
+      }, 'image/png');
+    };
+    img.src = url;
+  });
+})();
+</script>

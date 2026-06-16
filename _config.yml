@@ -113,6 +113,9 @@ page_paths:
   - index.html
   - about.markdown
   - resume.html
+  - tools.html
+  - nav.html
+  - friends.html
   - all-posts.md
   - archives/index.html
   - categories/index.html

@@ -1,0 +1,5 @@
+- name: SVG 转 PNG
+  icon: "🖼️"
+  description: SVG 转 PNG 并支持修改颜色
+  url: /tools/svg2png/
+  external: false
