@@ -1,0 +1,377 @@
+---
+layout: default
+title: 图片颜色拾取器
+permalink: /tools/color-picker/
+---
+
+<article class="page h-entry">
+  <header class="page-header">
+    <a class="tool-back-link" href="{{ '/tools' | relative_url }}">← 返回工具集</a>
+    <h1 class="page-title p-name">图片颜色拾取器</h1>
+  </header>
+
+  <div class="tool-container">
+    <!-- 上传区 -->
+    <div class="cp-upload-zone" id="uploadZone">
+      <div class="cp-upload-icon">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="17 8 12 3 7 8"/>
+          <line x1="12" y1="3" x2="12" y2="15"/>
+        </svg>
+      </div>
+      <p class="cp-upload-text">拖拽图片到此处，或点击上传</p>
+      <p class="cp-upload-hint">支持 JPG、PNG、WebP、GIF 等常见格式</p>
+      <input type="file" id="fileInput" accept="image/*" hidden>
+    </div>
+
+    <!-- 工作区 (上传后显示) -->
+    <div class="cp-workspace" id="workspace" style="display:none;">
+      <div class="cp-workspace-header">
+        <button class="tool-btn" id="reuploadBtn">← 重新上传</button>
+      </div>
+
+      <div class="cp-main">
+        <!-- 左侧：图片区域 -->
+        <div class="cp-image-section">
+          <div class="cp-image-wrapper" id="imageWrapper">
+            <canvas id="imageCanvas"></canvas>
+            <div class="cp-crosshair" id="crosshair" style="display:none;"></div>
+            <div class="cp-zoom-lens" id="zoomLens" style="display:none;">
+              <canvas id="zoomCanvas" width="100" height="100"></canvas>
+            </div>
+          </div>
+          <p class="cp-hint">点击图片任意位置拾取颜色</p>
+        </div>
+
+        <!-- 右侧：颜色信息 -->
+        <div class="cp-info-section">
+          <!-- 当前颜色 -->
+          <div class="cp-color-preview">
+            <div class="cp-color-swatch" id="colorSwatch"></div>
+            <div class="cp-color-empty" id="colorEmpty">点击图片<br>拾取颜色</div>
+          </div>
+
+          <!-- 颜色值 -->
+          <div class="cp-color-values" id="colorValues">
+            <div class="cp-value-item">
+              <span class="cp-value-label">HEX</span>
+              <div class="cp-value-row">
+                <code class="cp-value-code" id="hexValue">—</code>
+                <button class="cp-copy-btn" data-target="hexValue" title="复制">复制</button>
+              </div>
+            </div>
+            <div class="cp-value-item">
+              <span class="cp-value-label">RGB</span>
+              <div class="cp-value-row">
+                <code class="cp-value-code" id="rgbValue">—</code>
+                <button class="cp-copy-btn" data-target="rgbValue" title="复制">复制</button>
+              </div>
+            </div>
+            <div class="cp-value-item">
+              <span class="cp-value-label">HSL</span>
+              <div class="cp-value-row">
+                <code class="cp-value-code" id="hslValue">—</code>
+                <button class="cp-copy-btn" data-target="hslValue" title="复制">复制</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 历史记录 -->
+          <div class="cp-history" id="colorHistory">
+            <h4 class="cp-history-title">颜色历史</h4>
+            <div class="cp-history-list" id="historyList"></div>
+            <button class="cp-clear-btn" id="clearHistory" style="display:none;">清空历史</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</article>
+
+<script>
+(function() {
+  var uploadZone = document.getElementById('uploadZone');
+  var fileInput = document.getElementById('fileInput');
+  var workspace = document.getElementById('workspace');
+  var imageCanvas = document.getElementById('imageCanvas');
+  var zoomCanvas = document.getElementById('zoomCanvas');
+  var zoomCtx = zoomCanvas.getContext('2d');
+  var imageWrapper = document.getElementById('imageWrapper');
+  var crosshair = document.getElementById('crosshair');
+  var zoomLens = document.getElementById('zoomLens');
+  var colorSwatch = document.getElementById('colorSwatch');
+  var colorEmpty = document.getElementById('colorEmpty');
+  var colorValues = document.getElementById('colorValues');
+  var historyList = document.getElementById('historyList');
+  var clearHistoryBtn = document.getElementById('clearHistory');
+
+  var img = null;
+  var historyColors = [];
+  var maxHistory = 20;
+  var zoomSize = 100;
+  var zoomScale = 4;
+
+  // --- 上传 ---
+  uploadZone.addEventListener('click', function() { fileInput.click(); });
+  fileInput.addEventListener('change', function(e) { handleFile(e.target.files[0]); });
+
+  uploadZone.addEventListener('dragover', function(e) {
+    e.preventDefault();
+    uploadZone.classList.add('cp-upload-zone--active');
+  });
+  uploadZone.addEventListener('dragleave', function() {
+    uploadZone.classList.remove('cp-upload-zone--active');
+  });
+  uploadZone.addEventListener('drop', function(e) {
+    e.preventDefault();
+    uploadZone.classList.remove('cp-upload-zone--active');
+    var file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith('image/')) handleFile(file);
+  });
+
+  document.getElementById('reuploadBtn').addEventListener('click', function() {
+    workspace.style.display = 'none';
+    uploadZone.style.display = 'block';
+    fileInput.value = '';
+    img = null;
+    historyColors = [];
+    renderHistory();
+  });
+
+  function handleFile(file) {
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      img = new Image();
+      img.onload = function() {
+        var maxW = 700;
+        var scale = 1;
+        if (img.naturalWidth > maxW) {
+          scale = maxW / img.naturalWidth;
+        }
+        imageCanvas.width = img.naturalWidth * scale;
+        imageCanvas.height = img.naturalHeight * scale;
+        var ctx = imageCanvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, imageCanvas.width, imageCanvas.height);
+        
+        uploadZone.style.display = 'none';
+        workspace.style.display = 'block';
+        resetColor();
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  // --- 颜色拾取 ---
+  imageCanvas.addEventListener('click', function(e) {
+    var rect = imageCanvas.getBoundingClientRect();
+    var x = Math.floor(e.clientX - rect.left);
+    var y = Math.floor(e.clientY - rect.top);
+    
+    // 考虑 CSS 缩放
+    x = Math.floor(x * (imageCanvas.width / rect.width));
+    y = Math.floor(y * (imageCanvas.height / rect.height));
+    
+    if (x < 0 || y < 0 || x >= imageCanvas.width || y >= imageCanvas.height) return;
+    
+    var ctx = imageCanvas.getContext('2d');
+    var pixel = ctx.getImageData(x, y, 1, 1).data;
+    var r = pixel[0], g = pixel[1], b = pixel[2], a = pixel[3];
+    
+    showCrosshair(x, y);
+    updateColorDisplay(r, g, b, a);
+    addToHistory(r, g, b, a);
+  });
+
+  imageCanvas.addEventListener('mousemove', function(e) {
+    var rect = imageCanvas.getBoundingClientRect();
+    var x = Math.floor(e.clientX - rect.left);
+    var y = Math.floor(e.clientY - rect.top);
+    
+    x = Math.floor(x * (imageCanvas.width / rect.width));
+    y = Math.floor(y * (imageCanvas.height / rect.height));
+    
+    if (x < 0 || y < 0 || x >= imageCanvas.width || y >= imageCanvas.height) {
+      zoomLens.style.display = 'none';
+      return;
+    }
+    
+    updateZoom(x, y);
+  });
+
+  imageCanvas.addEventListener('mouseleave', function() {
+    zoomLens.style.display = 'none';
+  });
+
+  // --- 十字准星 ---
+  function showCrosshair(x, y) {
+    var rect = imageCanvas.getBoundingClientRect();
+    var scaleX = rect.width / imageCanvas.width;
+    var scaleY = rect.height / imageCanvas.height;
+    
+    crosshair.style.display = 'block';
+    crosshair.style.left = (x * scaleX) + 'px';
+    crosshair.style.top = (y * scaleY) + 'px';
+    
+    // 动画闪烁
+    crosshair.classList.remove('cp-crosshair--flash');
+    void crosshair.offsetWidth;
+    crosshair.classList.add('cp-crosshair--flash');
+  }
+
+  // --- 放大镜 ---
+  function updateZoom(x, y) {
+    var rect = imageCanvas.getBoundingClientRect();
+    var scaleX = rect.width / imageCanvas.width;
+    var scaleY = rect.height / imageCanvas.height;
+    
+    var half = zoomSize / (2 * zoomScale);
+    var sx = Math.max(0, Math.min(x - half, imageCanvas.width - zoomSize / zoomScale));
+    var sy = Math.max(0, Math.min(y - half, imageCanvas.height - zoomSize / zoomScale));
+    var sw = zoomSize / zoomScale;
+    var sh = zoomSize / zoomScale;
+    
+    if (sx + sw > imageCanvas.width) sx = Math.max(0, imageCanvas.width - sw);
+    if (sy + sh > imageCanvas.height) sy = Math.max(0, imageCanvas.height - sh);
+    
+    zoomCtx.imageSmoothingEnabled = false;
+    zoomCtx.drawImage(imageCanvas, sx, sy, sw, sh, 0, 0, zoomSize, zoomSize);
+    
+    // 画中心十字
+    zoomCtx.strokeStyle = '#fff';
+    zoomCtx.lineWidth = 1;
+    zoomCtx.strokeRect(zoomSize/2 - 5, zoomSize/2, 10, 1);
+    zoomCtx.strokeRect(zoomSize/2, zoomSize/2 - 5, 1, 10);
+    
+    zoomLens.style.display = 'block';
+    zoomLens.style.left = (x * scaleX + 14) + 'px';
+    zoomLens.style.top = (y * scaleY - zoomSize - 14) + 'px';
+  }
+
+  // --- 颜色显示 ---
+  function updateColorDisplay(r, g, b, a) {
+    var hex = rgbToHex(r, g, b);
+    var hsl = rgbToHsl(r, g, b);
+    
+    document.getElementById('hexValue').textContent = hex;
+    document.getElementById('rgbValue').textContent = 'rgb(' + r + ', ' + g + ', ' + b + ')';
+    document.getElementById('hslValue').textContent = 'hsl(' + hsl[0] + ', ' + hsl[1] + '%, ' + hsl[2] + '%)';
+    
+    colorSwatch.style.backgroundColor = 'rgb(' + r + ',' + g + ',' + b + ')';
+    colorSwatch.style.display = 'block';
+    colorEmpty.style.display = 'none';
+    colorValues.style.display = 'flex';
+  }
+
+  function resetColor() {
+    colorSwatch.style.display = 'none';
+    colorEmpty.style.display = 'flex';
+    colorValues.style.display = 'none';
+    document.getElementById('hexValue').textContent = '—';
+    document.getElementById('rgbValue').textContent = '—';
+    document.getElementById('hslValue').textContent = '—';
+    crosshair.style.display = 'none';
+  }
+
+  // --- 颜色历史 ---
+  function addToHistory(r, g, b, a) {
+    var hex = rgbToHex(r, g, b);
+    // 避免重复
+    if (historyColors.length > 0 && historyColors[0].hex === hex) return;
+    
+    historyColors.unshift({ r: r, g: g, b: b, a: a, hex: hex });
+    if (historyColors.length > maxHistory) historyColors.pop();
+    renderHistory();
+  }
+
+  function renderHistory() {
+    historyList.innerHTML = '';
+    historyColors.forEach(function(c) {
+      var dot = document.createElement('span');
+      dot.className = 'cp-history-dot';
+      dot.style.backgroundColor = 'rgb(' + c.r + ',' + c.g + ',' + c.b + ')';
+      dot.title = c.hex;
+      dot.addEventListener('click', function() {
+        updateColorDisplay(c.r, c.g, c.b, c.a);
+      });
+      historyList.appendChild(dot);
+    });
+    clearHistoryBtn.style.display = historyColors.length > 0 ? 'inline-block' : 'none';
+  }
+
+  clearHistoryBtn.addEventListener('click', function() {
+    historyColors = [];
+    renderHistory();
+  });
+
+  // --- 复制 ---
+  document.querySelectorAll('.cp-copy-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var targetId = btn.dataset.target;
+      var text = document.getElementById(targetId).textContent;
+      if (text === '—') return;
+      
+      navigator.clipboard.writeText(text).then(function() {
+        btn.textContent = '已复制';
+        btn.classList.add('cp-copy-btn--copied');
+        setTimeout(function() {
+          btn.textContent = '复制';
+          btn.classList.remove('cp-copy-btn--copied');
+        }, 1500);
+      }).catch(function() {
+        // fallback
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        btn.textContent = '已复制';
+        btn.classList.add('cp-copy-btn--copied');
+        setTimeout(function() {
+          btn.textContent = '复制';
+          btn.classList.remove('cp-copy-btn--copied');
+        }, 1500);
+      });
+    });
+  });
+
+  // --- 颜色转换 ---
+  function rgbToHex(r, g, b) {
+    return '#' + [r, g, b].map(function(v) {
+      return v.toString(16).toUpperCase().padStart(2, '0');
+    }).join('');
+  }
+
+  function rgbToHsl(r, g, b) {
+    r /= 255; g /= 255; b /= 255;
+    var max = Math.max(r, g, b), min = Math.min(r, g, b);
+    var h = 0, s = 0, l = (max + min) / 2;
+    if (max !== min) {
+      var d = max - min;
+      s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+      switch (max) {
+        case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
+        case g: h = ((b - r) / d + 2) / 6; break;
+        case b: h = ((r - g) / d + 4) / 6; break;
+      }
+    }
+    return [Math.round(h * 360), Math.round(s * 100), Math.round(l * 100)];
+  }
+
+  // --- 粘贴图片 ---
+  document.addEventListener('paste', function(e) {
+    if (uploadZone.style.display === 'none') return;
+    var items = e.clipboardData.items;
+    for (var i = 0; i < items.length; i++) {
+      if (items[i].type.startsWith('image/')) {
+        var blob = items[i].getAsFile();
+        handleFile(blob);
+        break;
+      }
+    }
+  });
+})();
+</script>

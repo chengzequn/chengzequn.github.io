@@ -3,3 +3,19 @@
   description: SVG 转 PNG 并支持修改颜色
   url: /tools/svg2png/
   external: false
+
+- name: 图片颜色拾取器
+  icon: "🎨"
+  description: 上传图片，点击拾取任意像素颜色
+  url: /tools/color-picker/
+  external: false
+
+- name: 图片颜色更改
+  icon: "🔄"
+  description: 替换图片中的指定颜色为新颜色
+  url: /tools/color-replace/
+  external: false
+
+
+
+

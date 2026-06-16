@@ -1,0 +1,303 @@
+---
+layout: default
+title: 图片颜色更改
+permalink: /tools/color-replace/
+---
+
+<article class="page h-entry">
+  <header class="page-header">
+    <a class="tool-back-link" href="{{ '/tools' | relative_url }}">← 返回工具集</a>
+    <h1 class="page-title p-name">图片颜色更改</h1>
+  </header>
+
+  <div class="tool-container">
+    <!-- 上传区 -->
+    <div class="cp-upload-zone" id="uploadZone">
+      <div class="cp-upload-icon">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="17 8 12 3 7 8"/>
+          <line x1="12" y1="3" x2="12" y2="15"/>
+        </svg>
+      </div>
+      <p class="cp-upload-text">拖拽图片到此处，或点击上传</p>
+      <p class="cp-upload-hint">支持 JPG、PNG、WebP 等格式</p>
+      <input type="file" id="fileInput" accept="image/*" hidden>
+    </div>
+
+    <!-- 工作区 -->
+    <div class="cr-workspace" id="workspace" style="display:none;">
+      <div class="cr-workspace-header">
+        <button class="tool-btn" id="reuploadBtn">← 重新上传</button>
+      </div>
+
+      <!-- 控制面板 -->
+      <div class="cr-controls">
+        <div class="cr-control-row">
+          <!-- 源颜色 -->
+          <div class="cr-color-field">
+            <span class="cr-field-label">源颜色</span>
+            <div class="cr-color-pick-wrap">
+              <div class="cr-sw-preview" id="sourceColorSwatch"></div>
+              <code class="cr-hex-text" id="sourceHex">—</code>
+            </div>
+          </div>
+          <!-- 箭头 -->
+          <span class="cr-arrow-icon">→</span>
+          <!-- 目标颜色 -->
+          <div class="cr-color-field">
+            <span class="cr-field-label">替换为</span>
+            <div class="cr-color-pick-wrap">
+              <input type="color" id="targetColor" value="#ff0000">
+              <input type="text" id="targetColorText" value="#FF0000" maxlength="7">
+            </div>
+          </div>
+          <!-- 容差 -->
+          <div class="cr-color-field cr-tolerance-field">
+            <span class="cr-field-label">容差 <span id="toleranceVal">32</span></span>
+            <input type="range" class="cr-tolerance-slider" id="toleranceSlider" min="0" max="200" value="32">
+          </div>
+        </div>
+        <div class="cr-actions">
+          <button class="tool-btn tool-btn-primary" id="applyBtn">应用更改</button>
+          <button class="tool-btn" id="resetBtn">重置</button>
+          <button class="tool-btn tool-btn-primary" id="downloadBtn" disabled>下载结果</button>
+        </div>
+      </div>
+
+      <!-- 双图对比 -->
+      <div class="cr-images">
+        <div class="cr-image-panel">
+          <h4 class="cr-panel-title">原图 <span class="cr-click-hint">（点击选取颜色）</span></h4>
+          <div class="cr-image-box" id="sourceBox">
+            <canvas id="sourceCanvas"></canvas>
+            <div class="cr-pick-cursor" id="pickCursor" style="display:none;"></div>
+          </div>
+        </div>
+        <div class="cr-image-panel">
+          <h4 class="cr-panel-title">预览</h4>
+          <div class="cr-image-box cr-image-box--result">
+            <canvas id="resultCanvas"></canvas>
+            <div class="cr-empty-preview" id="emptyPreview">点击「应用更改」生成预览</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</article>
+
+<script>
+(function() {
+  var uploadZone = document.getElementById('uploadZone');
+  var fileInput = document.getElementById('fileInput');
+  var workspace = document.getElementById('workspace');
+  var sourceCanvas = document.getElementById('sourceCanvas');
+  var resultCanvas = document.getElementById('resultCanvas');
+  var resultCtx = resultCanvas.getContext('2d');
+  var sourceBox = document.getElementById('sourceBox');
+  var pickCursor = document.getElementById('pickCursor');
+  var emptyPreview = document.getElementById('emptyPreview');
+
+  var sourceColorSwatch = document.getElementById('sourceColorSwatch');
+  var sourceHex = document.getElementById('sourceHex');
+  var targetColor = document.getElementById('targetColor');
+  var targetColorText = document.getElementById('targetColorText');
+  var toleranceSlider = document.getElementById('toleranceSlider');
+  var toleranceVal = document.getElementById('toleranceVal');
+
+  var img = null;
+  var sourceImageData = null;
+  var sourceR = null, sourceG = null, sourceB = null;
+  var resultGenerated = false;
+
+  // --- 上传 ---
+  uploadZone.addEventListener('click', function() { fileInput.click(); });
+  fileInput.addEventListener('change', function(e) { handleFile(e.target.files[0]); });
+
+  uploadZone.addEventListener('dragover', function(e) {
+    e.preventDefault();
+    uploadZone.classList.add('cp-upload-zone--active');
+  });
+  uploadZone.addEventListener('dragleave', function() {
+    uploadZone.classList.remove('cp-upload-zone--active');
+  });
+  uploadZone.addEventListener('drop', function(e) {
+    e.preventDefault();
+    uploadZone.classList.remove('cp-upload-zone--active');
+    var file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith('image/')) handleFile(file);
+  });
+
+  document.getElementById('reuploadBtn').addEventListener('click', function() {
+    workspace.style.display = 'none';
+    uploadZone.style.display = 'block';
+    fileInput.value = '';
+    img = null;
+    sourceImageData = null;
+    sourceR = sourceG = sourceB = null;
+    resultGenerated = false;
+    document.getElementById('downloadBtn').disabled = true;
+  });
+
+  function handleFile(file) {
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      img = new Image();
+      img.onload = function() {
+        var maxW = 560;
+        var scale = 1;
+        if (img.naturalWidth > maxW) {
+          scale = maxW / img.naturalWidth;
+        }
+        var w = Math.round(img.naturalWidth * scale);
+        var h = Math.round(img.naturalHeight * scale);
+        sourceCanvas.width = w;
+        sourceCanvas.height = h;
+        resultCanvas.width = w;
+        resultCanvas.height = h;
+
+        var ctx = sourceCanvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, w, h);
+        sourceImageData = ctx.getImageData(0, 0, w, h);
+
+        uploadZone.style.display = 'none';
+        workspace.style.display = 'flex';
+        resetSourceColor();
+        emptyPreview.style.display = 'flex';
+        resultCtx.clearRect(0, 0, resultCanvas.width, resultCanvas.height);
+        document.getElementById('downloadBtn').disabled = true;
+        resultGenerated = false;
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  // --- 点击原图拾取源颜色 ---
+  sourceCanvas.addEventListener('click', function(e) {
+    if (!sourceImageData) return;
+    var rect = sourceCanvas.getBoundingClientRect();
+    var x = Math.floor(e.clientX - rect.left);
+    var y = Math.floor(e.clientY - rect.top);
+    x = Math.floor(x * (sourceCanvas.width / rect.width));
+    y = Math.floor(y * (sourceCanvas.height / rect.height));
+
+    if (x < 0 || y < 0 || x >= sourceCanvas.width || y >= sourceCanvas.height) return;
+
+    var idx = (y * sourceCanvas.width + x) * 4;
+    sourceR = sourceImageData.data[idx];
+    sourceG = sourceImageData.data[idx + 1];
+    sourceB = sourceImageData.data[idx + 2];
+    updateSourceColorDisplay();
+    showPickCursor(x, y);
+  });
+
+  function showPickCursor(x, y) {
+    var rect = sourceCanvas.getBoundingClientRect();
+    var sx = x * (rect.width / sourceCanvas.width);
+    var sy = y * (rect.height / sourceCanvas.height);
+    pickCursor.style.display = 'block';
+    pickCursor.style.left = sx + 'px';
+    pickCursor.style.top = sy + 'px';
+
+    pickCursor.classList.remove('cr-pick-cursor--flash');
+    void pickCursor.offsetWidth;
+    pickCursor.classList.add('cr-pick-cursor--flash');
+  }
+
+  function updateSourceColorDisplay() {
+    if (sourceR === null) return;
+    var hex = rgbToHex(sourceR, sourceG, sourceB);
+    sourceColorSwatch.style.backgroundColor = 'rgb(' + sourceR + ',' + sourceG + ',' + sourceB + ')';
+    sourceHex.textContent = hex;
+  }
+
+  function resetSourceColor() {
+    sourceR = sourceG = sourceB = null;
+    sourceColorSwatch.style.backgroundColor = 'transparent';
+    sourceHex.textContent = '—';
+    pickCursor.style.display = 'none';
+  }
+
+  // --- 颜色拾取器双向绑定 ---
+  targetColor.addEventListener('input', function() {
+    targetColorText.value = targetColor.value.toUpperCase();
+  });
+  targetColorText.addEventListener('input', function() {
+    var v = targetColorText.value.trim();
+    if (/^#[0-9a-fA-F]{6}$/.test(v)) {
+      targetColor.value = v.toLowerCase();
+    }
+  });
+  targetColorText.addEventListener('blur', function() {
+    targetColorText.value = targetColor.value.toUpperCase();
+  });
+
+  // --- 容差滑块 ---
+  toleranceSlider.addEventListener('input', function() {
+    toleranceVal.textContent = toleranceSlider.value;
+  });
+
+  // --- 应用颜色替换 ---
+  document.getElementById('applyBtn').addEventListener('click', function() {
+    if (!sourceImageData || sourceR === null) return;
+    var data = new Uint8ClampedArray(sourceImageData.data);
+    var tolerance = parseInt(toleranceSlider.value);
+    var tr = hexToR(targetColor.value);
+    var tg = hexToG(targetColor.value);
+    var tb = hexToB(targetColor.value);
+
+    for (var i = 0; i < data.length; i += 4) {
+      var r = data[i], g = data[i + 1], b = data[i + 2];
+      var dr = r - sourceR, dg = g - sourceG, db = b - sourceB;
+      var dist = Math.sqrt(dr * dr + dg * dg + db * db);
+
+      if (dist <= tolerance) {
+        // 混合：越接近源色，替换越完全
+        var mix = Math.max(0, 1 - dist / (tolerance || 1));
+        data[i] = Math.round(r * (1 - mix) + tr * mix);
+        data[i + 1] = Math.round(g * (1 - mix) + tg * mix);
+        data[i + 2] = Math.round(b * (1 - mix) + tb * mix);
+      }
+    }
+
+    var newImageData = new ImageData(data, sourceCanvas.width, sourceCanvas.height);
+    resultCtx.putImageData(newImageData, 0, 0);
+
+    emptyPreview.style.display = 'none';
+    document.getElementById('downloadBtn').disabled = false;
+    resultGenerated = true;
+  });
+
+  // --- 重置 ---
+  document.getElementById('resetBtn').addEventListener('click', function() {
+    if (!sourceImageData) return;
+    resultCtx.putImageData(sourceImageData, 0, 0);
+    emptyPreview.style.display = 'none';
+    document.getElementById('downloadBtn').disabled = true;
+    resultGenerated = false;
+    resetSourceColor();
+  });
+
+  // --- 下载 ---
+  document.getElementById('downloadBtn').addEventListener('click', function() {
+    if (!resultGenerated) return;
+    var link = document.createElement('a');
+    link.download = 'recolored.png';
+    link.href = resultCanvas.toDataURL('image/png');
+    link.click();
+  });
+
+  // --- 工具函数 ---
+  function rgbToHex(r, g, b) {
+    return '#' + [r, g, b].map(function(v) {
+      return v.toString(16).toUpperCase().padStart(2, '0');
+    }).join('');
+  }
+
+  function hexToR(hex) { return parseInt(hex.slice(1, 3), 16); }
+  function hexToG(hex) { return parseInt(hex.slice(3, 5), 16); }
+  function hexToB(hex) { return parseInt(hex.slice(5, 7), 16); }
+})();
+</script>
