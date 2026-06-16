@@ -46,7 +46,7 @@
   <!-- 微信二维码 -->
   <div class="wechat-qrcode" style="display: none;">
     <div class="qrcode-container">
-      <img id="wechat-qrcode-image" src="" alt="微信扫码分享"/>
+      <img id="wechat-qrcode-image" src="" alt="微信扫码分享" loading="lazy"/>
       <p>微信扫一扫分享</p>
     </div>
   </div>
@@ -161,12 +161,12 @@
           
           <div class="reward-qr-codes">
             <div class="qr-code-item">
-              <img src="{{ site.baseurl }}/assets/images/reward/reward_weixinpay.jpg" alt="微信支付">
+              <img src="{{ site.baseurl }}/assets/images/reward/reward_weixinpay.jpg" alt="微信支付" loading="lazy">
               <p>微信支付</p>
             </div>
             
             <div class="qr-code-item">
-              <img src="{{ site.baseurl }}/assets/images/reward/reward_ali_pay.jpg" alt="支付宝">
+              <img src="{{ site.baseurl }}/assets/images/reward/reward_ali_pay.jpg" alt="支付宝" loading="lazy">
               <p>支付宝</p>
             </div>
           </div>
@@ -265,7 +265,7 @@
     border: none;
     font-size: 1.5rem;
     cursor: pointer;
-    color: #999;
+    color: #6b7280;
     padding: 0;
     width: 30px;
     height: 30px;
@@ -278,7 +278,7 @@
   
   .close-button:hover {
     background-color: #f5f5f5;
-    color: #666;
+    color: #4b5563;
   }
   
   .reward-qr-codes {
@@ -300,12 +300,12 @@
   .qr-code-item p {
     margin: 0;
     font-size: 0.9rem;
-    color: #666;
+    color: #4b5563;
   }
   
   .reward-tip {
     text-align: center;
-    color: #999;
+    color: #6b7280;
     font-size: 0.85rem;
     margin: 0;
   }

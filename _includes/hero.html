@@ -4,7 +4,7 @@
     <!-- Background with Overlay -->
     <div class="hero-bg">
       <div class="hero-overlay"></div>
-      <img src="{{ "/assets/images/hero_bg.jpg" | relative_url }}" alt="Hero Background" class="hero-image"/>
+      <img src="{{ "/assets/images/hero_bg.jpg" | relative_url }}" alt="Hero Background" class="hero-image" decoding="async"/>
     </div>
     
     <!-- Hero Content -->
@@ -25,7 +25,7 @@
               <path d="M5 12h14M12 5l7 7-7 7"/>
             </svg>
           </a>
-          <a href="{{ "/jekyll/update/2025/09/09/welcome-to-jekyll.html" | relative_url }}" class="btn btn-secondary">
+          <a href="{{ "/archives/" | relative_url }}" class="btn btn-secondary">
             最新文章
           </a>
         </div>
@@ -73,14 +73,7 @@
     
     observer.observe(heroSection);
     
-    // Parallax effect for background
-    window.addEventListener('scroll', function() {
-      const scrollPosition = window.pageYOffset;
-      const heroBg = document.querySelector('.hero-image');
-      if (heroBg) {
-        heroBg.style.transform = `translateY(${scrollPosition * 0.4}px)`;
-      }
-    });
+    // Hero background stays fixed while scrolling
   });
 </script>
 

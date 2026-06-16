@@ -22,4 +22,4 @@ permalink: /about/
 ## 联系我
 
 - **GitHub**: [chengzequn](https://github.com/chengzequn)
-- **Email**: [chengzequn@example.com](mailto:chengzequn@example.com)
+- **Email**: [chengzequn@foxmail.com](mailto:chengzequn@foxmail.com)

@@ -19,29 +19,132 @@ function smoothScroll() {
 
 // 响应式导航菜单
 function handleResponsiveNav() {
-  const navTrigger = document.getElementById('nav-trigger');
-  if (navTrigger) {
-    navTrigger.addEventListener('change', function() {
-      const menuIcon = this.nextElementSibling;
-      if (this.checked) {
-        menuIcon.classList.add('active');
+  const navToggleLabel = document.querySelector('.nav-toggle-label');
+  const mobileNavMenu = document.querySelector('.mobile-nav-menu');
+  const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
+  
+  if (!navToggleLabel || !mobileNavMenu) return;
+  
+  function openMenu() {
+    navToggleLabel.classList.add('active');
+    mobileNavMenu.classList.add('active');
+    document.body.classList.add('menu-open');
+  }
+  
+  function closeMenu() {
+    navToggleLabel.classList.remove('active');
+    mobileNavMenu.classList.remove('active');
+    document.body.classList.remove('menu-open');
+  }
+  
+  function toggleMenu() {
+    if (mobileNavMenu.classList.contains('active')) {
+      closeMenu();
+    } else {
+      openMenu();
+    }
+  }
+  
+  navToggleLabel.addEventListener('click', toggleMenu);
+  
+  // Close menu when a link is clicked
+  mobileNavLinks.forEach(link => {
+    link.addEventListener('click', closeMenu);
+  });
+  
+  // Close menu on Escape key
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && mobileNavMenu.classList.contains('active')) {
+      closeMenu();
+    }
+  });
+  
+  // Close menu when clicking outside (backdrop click)
+  document.addEventListener('click', function(e) {
+    if (mobileNavMenu.classList.contains('active')) {
+      const isInside = mobileNavMenu.contains(e.target) || navToggleLabel.contains(e.target);
+      if (!isInside) {
+        closeMenu();
+      }
+    }
+  });
+  
+  // Touch-friendly dropdown toggle
+  const dropdownToggles = document.querySelectorAll('.dropdown-toggle');
+  dropdownToggles.forEach(toggle => {
+    toggle.addEventListener('click', function(e) {
+      if (window.innerWidth <= 768) return; // Only for tablet+
+      e.preventDefault();
+      const dropdown = this.parentElement;
+      const isActive = dropdown.classList.contains('dropdown-active');
+      
+      // Close any other open dropdowns
+      document.querySelectorAll('.dropdown.dropdown-active').forEach(d => {
+        if (d !== dropdown) d.classList.remove('dropdown-active');
+      });
+      
+      if (isActive) {
+        dropdown.classList.remove('dropdown-active');
       } else {
-        menuIcon.classList.remove('active');
+        dropdown.classList.add('dropdown-active');
+      }
+    });
+  });
+  
+  // Close dropdowns when clicking outside
+  document.addEventListener('click', function(e) {
+    if (!e.target.closest('.dropdown')) {
+      document.querySelectorAll('.dropdown.dropdown-active').forEach(d => {
+        d.classList.remove('dropdown-active');
+      });
+    }
+  });
+  
+  // Setup mobile theme toggle
+  const mobileThemeToggle = document.querySelector('.mobile-theme-toggle');
+  if (mobileThemeToggle) {
+    mobileThemeToggle.addEventListener('click', function() {
+      const html = document.documentElement;
+      const current = html.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+      const next = current === 'dark' ? 'light' : 'dark';
+      localStorage.setItem('theme', next);
+      if (next === 'dark') {
+        html.setAttribute('data-theme', 'dark');
+      } else {
+        html.removeAttribute('data-theme');
+      }
+    });
+  }
+  
+  // Setup mobile search button
+  const mobileSearchBtn = document.querySelector('.mobile-search-btn');
+  if (mobileSearchBtn) {
+    mobileSearchBtn.addEventListener('click', function() {
+      const searchModal = document.getElementById('search-modal');
+      if (searchModal) {
+        searchModal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+        closeMenu();
+        const searchInput = document.getElementById('search-input');
+        if (searchInput) {
+          setTimeout(() => searchInput.focus(), 300);
+        }
       }
     });
   }
 }
 
-// 滚动时导航栏效果
-function handleScrollEffects() {
-  const header = document.querySelector('.site-header');
-  if (!header) return;
+// 窗口缩放时处理移动端菜单关闭 & 滚动导航栏效果联合处理
+function handleResize() {
+  const mobileNavMenu = document.querySelector('.mobile-nav-menu');
+  const navToggleLabel = document.querySelector('.nav-toggle-label');
   
-  window.addEventListener('scroll', function() {
-    if (window.scrollY > 50) {
-      header.classList.add('scrolled');
-    } else {
-      header.classList.remove('scrolled');
+  window.addEventListener('resize', function() {
+    // 缩放超过移动端断点时自动关闭菜单
+    if (window.innerWidth > 768 && mobileNavMenu && mobileNavMenu.classList.contains('active')) {
+      mobileNavMenu.classList.remove('active');
+      if (navToggleLabel) navToggleLabel.classList.remove('active');
+      document.body.classList.remove('menu-open');
     }
   });
 }
@@ -81,13 +184,46 @@ function enhanceCardHoverEffects() {
   });
 }
 
-// 暗色模式支持检测
-function detectDarkMode() {
-  if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-    document.body.classList.add('dark-mode');
-  } else {
-    document.body.classList.remove('dark-mode');
+// 主题切换功能
+function setupThemeToggle() {
+  const html = document.documentElement;
+  const themeToggle = document.querySelector('.theme-toggle');
+  
+  // 获取存储的主题或系统偏好
+  function getPreferredTheme() {
+    const stored = localStorage.getItem('theme');
+    if (stored) return stored;
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   }
+  
+  // 应用主题
+  function applyTheme(theme) {
+    if (theme === 'dark') {
+      html.setAttribute('data-theme', 'dark');
+    } else {
+      html.removeAttribute('data-theme');
+    }
+  }
+  
+  // 初始化主题
+  applyTheme(getPreferredTheme());
+  
+  // 切换按钮点击事件
+  if (themeToggle) {
+    themeToggle.addEventListener('click', function() {
+      const current = html.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+      const next = current === 'dark' ? 'light' : 'dark';
+      localStorage.setItem('theme', next);
+      applyTheme(next);
+    });
+  }
+  
+  // 监听系统主题变化（仅在用户未手动设置时生效）
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
+    if (!localStorage.getItem('theme')) {
+      applyTheme(e.matches ? 'dark' : 'light');
+    }
+  });
 }
 
 // 添加科技感的背景动画
@@ -124,42 +260,6 @@ function addTechBackgroundAnimation() {
   }
   
   document.body.appendChild(particlesContainer);
-}
-
-// 添加页面加载动画
-function addPageLoadAnimation() {
-  // 检查是否已经添加了加载动画
-  if (document.querySelector('.page-loader')) return;
-  
-  const loader = document.createElement('div');
-  loader.className = 'page-loader';
-  loader.style.position = 'fixed';
-  loader.style.top = '0';
-  loader.style.left = '0';
-  loader.style.width = '100%';
-  loader.style.height = '100%';
-  loader.style.display = 'flex';
-  loader.style.justifyContent = 'center';
-  loader.style.alignItems = 'center';
-  loader.style.background = 'white';
-  loader.style.zIndex = '9999';
-  loader.style.transition = 'opacity 0.5s ease-out';
-  
-  const spinner = document.createElement('div');
-  spinner.className = 'loader';
-  
-  loader.appendChild(spinner);
-  document.body.appendChild(loader);
-  
-  // 页面加载完成后隐藏加载动画
-  window.addEventListener('load', function() {
-    setTimeout(function() {
-      loader.style.opacity = '0';
-      setTimeout(function() {
-        loader.style.display = 'none';
-      }, 500);
-    }, 300);
-  });
 }
 
 // 为按钮添加波纹效果
@@ -258,7 +358,7 @@ function setupSearchModal() {
   });
 
   // 初始化 Simple-Jekyll-Search
-  const search = new SimpleJekyllSearch({
+  new SimpleJekyllSearch({
     searchInput: searchInput,
     resultsContainer: searchResults,
     json: '/search.json',
@@ -273,18 +373,37 @@ function setupSearchModal() {
         </a>
       </li>
     `,
-    noResultsText: `
-      <div class="search-results-header">
-        <h3>搜索结果: "{query}"</h3>
-      </div>
-      <div class="search-results-list">
-        <li class="search-result-item">
-          <p class="search-no-results">未找到匹配的文章。</p>
-        </li>
-      </div>
-    `,
+    templateMiddleware: function(prop, value) {
+      if (prop === 'excerpt' && value.length > 200) {
+        return value.substring(0, 200) + '...';
+      }
+      return value;
+    },
+    noResultsText: function(query) {
+      return '<li class="search-result-item"><p class="search-no-results">未找到与 <strong>' + query + '</strong> 匹配的文章。</p></li>';
+    },
     limit: 20,
     fuzzy: false
+  });
+
+  // 监听搜索渲染事件，在结果前插入头部
+  document.addEventListener('simpleJekyllSearch:rendered', function(e) {
+    const resultsEl = document.getElementById('search-results');
+    if (!resultsEl) return;
+    const query = searchInput.value.trim();
+    if (!query) return;
+    const items = resultsEl.querySelectorAll('.search-result-item');
+    let header = resultsEl.querySelector('.search-results-header');
+    if (!header) {
+      header = document.createElement('div');
+      header.className = 'search-results-header';
+      resultsEl.insertBefore(header, resultsEl.firstChild);
+    }
+    if (items.length > 0) {
+      header.innerHTML = '<h3>搜索 "<span class="search-query-highlight">' + query + '</span>" 共找到 ' + items.length + ' 篇相关文章</h3>';
+    } else {
+      header.innerHTML = '';
+    }
   });
 
   // 为表单添加提交事件
@@ -372,6 +491,38 @@ function setupTableOfContentsHighlight() {
   window.addEventListener('scroll', function() {
     clearTimeout(tocUpdateTimeout);
     tocUpdateTimeout = setTimeout(updateTOC, 50); // 缩短防抖时间，提高响应速度
+  });
+}
+
+// 返回顶部按钮功能
+function setupBackToTop() {
+  const backToTopBtn = document.getElementById('back-to-top');
+  if (!backToTopBtn) return;
+
+  let ticking = false;
+
+  function toggleVisibility() {
+    const scrollY = window.scrollY || document.documentElement.scrollTop;
+    if (scrollY > 400) {
+      backToTopBtn.classList.add('visible');
+    } else {
+      backToTopBtn.classList.remove('visible');
+    }
+    ticking = false;
+  }
+
+  window.addEventListener('scroll', function() {
+    if (!ticking) {
+      requestAnimationFrame(toggleVisibility);
+      ticking = true;
+    }
+  }, { passive: true });
+
+  backToTopBtn.addEventListener('click', function() {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
   });
 }
 
@@ -484,74 +635,26 @@ window.addEventListener('DOMContentLoaded', function() {
   handleResponsiveNav();
   setupTableOfContentsHighlight();
   setupPageTitleNavigation();
+  setupBackToTop();
   
   // 科技感增强功能
-  handleScrollEffects();
+  handleResize();
   createScrollProgressBar();
   enhanceCardHoverEffects();
-  detectDarkMode();
+  setupThemeToggle();
   addTechBackgroundAnimation();
-  addPageLoadAnimation();
   addRippleEffect();
   addRippleAnimationStyle();
   
   // 搜索模态框功能
   setupSearchModal();
   
-  // 禁止文本复制功能
-  disableTextSelection();
-  
   // 监听暗色模式变化
   if (window.matchMedia) {
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', detectDarkMode);
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
+      setupThemeToggle();
+    });
   }
 });
 
-// 禁止文本复制功能
-function disableTextSelection() {
-  // 选择文章内容区域
-  const contentElements = document.querySelectorAll('.post-content, .post, .home-content');
-  
-  // 为每个内容区域添加禁止选择和复制的样式
-  contentElements.forEach(element => {
-    element.style.userSelect = 'none';
-    element.style.webkitUserSelect = 'none';
-    element.style.mozUserSelect = 'none';
-    element.style.msUserSelect = 'none';
-  });
-  
-  // 添加复制事件阻止
-  document.addEventListener('copy', function(e) {
-    // 检查复制的内容是否来自文章内容区域
-    const selection = window.getSelection();
-    if (selection.rangeCount > 0) {
-      const range = selection.getRangeAt(0);
-      const commonAncestor = range.commonAncestorContainer;
-      
-      // 如果复制的内容包含在我们想要保护的元素中，则阻止复制
-      const isInProtectedArea = contentElements.some(element => 
-        element.contains(commonAncestor) || element === commonAncestor
-      );
-      
-      if (isInProtectedArea) {
-        e.preventDefault();
-        
-        // 可选：显示提示信息
-        alert('本文禁止复制，请尊重原创内容');
-      }
-    }
-  });
-  
-  // 阻止右键菜单
-  document.addEventListener('contextmenu', function(e) {
-    // 只在内容区域阻止右键菜单
-    const target = e.target;
-    const isInProtectedArea = contentElements.some(element => 
-      element.contains(target) || element === target
-    );
-    
-    if (isInProtectedArea) {
-      e.preventDefault();
-    }
-  });
-}
+

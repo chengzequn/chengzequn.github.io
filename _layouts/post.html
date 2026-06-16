@@ -21,7 +21,7 @@ layout: default
       
       • 阅读时间: {{ word_count | divided_by: 500 | plus: 1 }} 分钟
       • 字数: {{ word_count }}
-      • <span id="page-views-count"><i class="far fa-eye"></i> <span>--</span></span>
+      • <span id="page-views-count">浏览量：<span>--</span></span>
     </p>
     
     <script>
@@ -70,6 +70,20 @@ layout: default
 
   <a class="u-url" href="{{ page.url | relative_url }}" hidden></a>
 </article>
+
+{% comment %}Mermaid 按需加载{% endcomment %}
+<script>
+  (function() {
+    if (document.querySelector('.mermaid, .language-mermaid, [class*="mermaid"]')) {
+      var s = document.createElement('script');
+      s.src = 'https://cdn.jsdelivr.net/npm/mermaid@10.4.0/dist/mermaid.min.js';
+      s.onload = function() {
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+      };
+      document.head.appendChild(s);
+    }
+  })();
+</script>
     </div>
   </div>
   

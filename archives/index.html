@@ -4,163 +4,153 @@ title: 归档
 permalink: /archives/
 ---
 
-<div class="archives-page">
-  <h1 class="page-heading">文章归档</h1>
-  <p class="archives-description">浏览网站上的所有文章，按时间顺序排列。</p>
-  
-  {% assign postsByYearMonth = site.posts | group_by_exp: "post", "post.date | date: '%Y年%m月'" %}
-  
-  {% if postsByYearMonth.size > 0 %}
-    <div class="archives-list">
-      {% for yearMonth in postsByYearMonth %}
-        {% assign postsByMonth = yearMonth.items | group_by_exp: "post", "post.date | date: '%m月'" %}
-        
-        {% for month in postsByMonth %}
-          {% assign year = yearMonth.name | split: '年' | first %}
-          {% assign monthName = month.name %}
-          
-          <div class="archive-section" id="{{ year }}-{{ monthName | remove: '月' }}">
-            <h2 class="archive-section-title">
-              <span class="archive-icon">📅</span>
-              {{ year }}年{{ monthName }}
-              <span class="archive-section-count">({{ month.items.size }})</span>
-            </h2>
-            
-            <ul class="archive-posts">
-              {% for post in month.items %}
-                <li class="archive-post-item">
-                  <a href="{{ post.url | relative_url }}" class="archive-post-link">
-                    <span class="archive-post-date">{{ post.date | date: "%d日" }}</span>
-                    <span class="archive-post-title">{{ post.title | escape }}</span>
-                    {% if post.categories.size > 0 %}
-                      <span class="archive-post-category">{{ post.categories | first }}</span>
-                    {% endif %}
-                  </a>
-                </li>
+<div class="content-container">
+  <div class="main-content">
+    <div class="tags-page">
+      <h1 class="page-heading">文章归档</h1>
+      <p class="tags-description">文章时间轴，记录每一篇博文的发布轨迹。</p>
+
+      {% if site.posts.size > 0 %}
+        {% assign postsByYear = site.posts | group_by_exp: "post", "post.date | date: '%Y'" %}
+        <div class="timeline">
+          {% for year in postsByYear %}
+            <div class="timeline-year">
+              <div class="timeline-year-marker">
+                <span class="timeline-year-dot"></span>
+                <h2 class="timeline-year-label">{{ year.name }} <span class="timeline-year-count">（{{ year.items.size }} 篇）</span></h2>
+              </div>
+              {% assign postsByMonth = year.items | group_by_exp: "post", "post.date | date: '%m'" %}
+              {% for month in postsByMonth %}
+                <div class="timeline-month">
+                  <div class="timeline-month-header">
+                    {% case month.name %}
+                      {% when '01' %}{% assign mn = '一月' %}
+                      {% when '02' %}{% assign mn = '二月' %}
+                      {% when '03' %}{% assign mn = '三月' %}
+                      {% when '04' %}{% assign mn = '四月' %}
+                      {% when '05' %}{% assign mn = '五月' %}
+                      {% when '06' %}{% assign mn = '六月' %}
+                      {% when '07' %}{% assign mn = '七月' %}
+                      {% when '08' %}{% assign mn = '八月' %}
+                      {% when '09' %}{% assign mn = '九月' %}
+                      {% when '10' %}{% assign mn = '十月' %}
+                      {% when '11' %}{% assign mn = '十一月' %}
+                      {% when '12' %}{% assign mn = '十二月' %}
+                      {% else %}{% assign mn = month.name %}
+                    {% endcase %}
+                    <span class="timeline-month-dot"></span>
+                    <span class="timeline-month-text">{{ mn }}</span>
+                    <span class="timeline-month-line"></span>
+                  </div>
+                  <ul class="timeline-posts">
+                    {% for post in month.items %}
+                      <li class="timeline-post-item">
+                        <div class="timeline-post-card">
+                          <time class="timeline-post-date">{{ post.date | date: "%m-%d" }}</time>
+                          <a href="{{ post.url | relative_url }}" class="timeline-post-title">{{ post.title | escape }}</a>
+                          {% if post.categories %}
+                            <span class="timeline-post-category">{{ post.categories | first }}</span>
+                          {% endif %}
+                        </div>
+                      </li>
+                    {% endfor %}
+                  </ul>
+                </div>
               {% endfor %}
-            </ul>
-          </div>
-        {% endfor %}
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="no-tags">
+          <p>暂无文章</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <aside class="sidebar">
+    {% if site.sidebar %}
+      {% for module in site.sidebar %}
+        {% assign module_key = module | default: '' %}
+        {% case module_key %}
+          {% when 'about' %}
+            <section class="sidebar-section">
+              <h3 class="sidebar-title">关于本站</h3>
+              <div class="sidebar-content">
+                <p>这里记录了我的技术学习、项目经验和生活感悟。</p>
+              </div>
+            </section>
+          {% when 'announcement' %}
+            <section class="sidebar-section">
+              {% include announcement.html %}
+            </section>
+          {% when 'word_count' %}
+            <section class="sidebar-section">
+              <h3 class="sidebar-title">文章统计</h3>
+              {% include word_count.html %}
+            </section>
+          {% when 'page_views' %}
+            <section class="sidebar-section">
+              <h3 class="sidebar-title">热门文章</h3>
+              {% include page_views.html %}
+            </section>
+          {% when 'wechat_official' %}
+            <section class="sidebar-section">
+              {% include wechat_official.html %}
+            </section>
+          {% when 'categories' %}
+            <section class="sidebar-section">
+              <h3 class="sidebar-title">文章分类</h3>
+              <ul class="category-list">
+                {% assign categories = site.categories | sort %}
+                {% for category in categories %}
+                  <li>
+                    <a href="{{ site.baseurl }}/categories/#{{ category | first | slugify }}" class="category-item">
+                      {{ category | first }} <span class="category-count">({{ category | last | size }})</span>
+                    </a>
+                  </li>
+                {% endfor %}
+              </ul>
+            </section>
+          {% when 'recent_posts' %}
+            <section class="sidebar-section">
+              <h3 class="sidebar-title">最新文章</h3>
+              <ul class="recent-posts">
+                {% for post in site.posts limit:5 %}
+                  <li>
+                    <a href="{{ post.url }}" class="recent-post-link">{{ post.title }}</a>
+                    <span class="recent-post-date">{{ post.date | date: "%m-%d" }}</span>
+                  </li>
+                {% endfor %}
+              </ul>
+            </section>
+          {% when 'social' %}
+            <section class="sidebar-section">
+              <h3 class="sidebar-title">关注我</h3>
+              <div class="social-links">
+                {% if site.social_links.github %}
+                  <a href="https://github.com/{{ site.social_links.github }}" target="_blank" rel="noopener noreferrer" class="social-link">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+                    </svg>
+                  </a>
+                {% endif %}
+              </div>
+            </section>
+          {% when 'rss' %}
+            <section class="sidebar-section">
+              <h3 class="sidebar-title">订阅更新</h3>
+              <a href="{{ site.baseurl }}/feed.xml" class="rss-link" target="_blank" rel="noopener noreferrer">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M4 11a9 9 0 0 1 9 9"></path>
+                  <path d="M4 4a16 16 0 0 1 16 16"></path>
+                  <circle cx="5" cy="19" r="1"></circle>
+                </svg>
+                RSS订阅
+              </a>
+            </section>
+        {% endcase %}
       {% endfor %}
-    </div>
-  {% else %}
-    <div class="no-archives">
-      <p>暂无文章</p>
-    </div>
-  {% endif %}
+    {% endif %}
+  </aside>
 </div>
-
-<style>
-/* 归档页面样式 */
-.archives-page {
-  background-color: $card-background;
-  border-radius: $radius-md;
-  box-shadow: 0 4px 12px $shadow-color;
-  padding: $spacing-xl;
-}
-
-.archives-description {
-  color: $text-secondary;
-  margin-bottom: $spacing-xl;
-  line-height: 1.6;
-}
-
-/* 归档区域样式 */
-.archives-list {
-  margin-top: $spacing-xl;
-}
-
-.archive-section {
-  margin-bottom: $spacing-xxl;
-  padding-bottom: $spacing-xl;
-  border-bottom: 1px solid $border-color;
-}
-
-.archive-section:last-child {
-  border-bottom: none;
-  margin-bottom: 0;
-  padding-bottom: 0;
-}
-
-.archive-section-title {
-  display: flex;
-  align-items: center;
-  gap: $spacing-sm;
-  font-size: $font-size-xl;
-  font-weight: 600;
-  color: $primary-color;
-  margin-bottom: $spacing-lg;
-  position: relative;
-}
-
-.archive-icon {
-  font-size: $font-size-lg;
-}
-
-.archive-section-count {
-  font-size: $font-size-sm;
-  color: $secondary-color;
-  font-weight: normal;
-}
-
-/* 归档文章列表样式 */
-.archive-posts {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.archive-post-item {
-  margin-bottom: $spacing-md;
-  padding-bottom: $spacing-md;
-  border-bottom: 1px solid $light-gray;
-}
-
-.archive-post-item:last-child {
-  margin-bottom: 0;
-  padding-bottom: 0;
-  border-bottom: none;
-}
-
-.archive-post-link {
-  display: flex;
-  align-items: center;
-  color: $text-color;
-  text-decoration: none;
-  transition: color 0.2s ease;
-  gap: $spacing-md;
-}
-
-.archive-post-link:hover {
-  color: $accent-color;
-}
-
-.archive-post-date {
-  font-size: $font-size-sm;
-  color: $secondary-color;
-  white-space: nowrap;
-  width: 50px;
-}
-
-.archive-post-title {
-  flex: 1;
-  font-weight: 500;
-  line-height: 1.4;
-}
-
-.archive-post-category {
-  font-size: $font-size-xs;
-  background-color: $light-gray;
-  color: $secondary-color;
-  padding: $spacing-xxs $spacing-xs;
-  border-radius: $radius-full;
-  white-space: nowrap;
-}
-
-/* 无归档提示样式 */
-.no-archives {
-  text-align: center;
-  padding: $spacing-xxl;
-  color: $secondary-color;
-}
-</style>
