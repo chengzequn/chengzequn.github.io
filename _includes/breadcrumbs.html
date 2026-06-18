@@ -1,0 +1,28 @@
+{% comment %}
+面包屑导航 + BreadcrumbList Schema
+{% endcomment %}
+<nav class="breadcrumbs" aria-label="面包屑导航">
+  <ol itemscope itemtype="https://schema.org/BreadcrumbList">
+    <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+      <a itemprop="item" href="{{ '/' | absolute_url }}">
+        <span itemprop="name">首页</span>
+      </a>
+    </li>
+    {% if page.categories %}
+      {% assign category_name = page.categories | first %}
+      {% assign category_slug = category_name | slugify %}
+      <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="{{ '/categories/#' | append: category_slug | absolute_url }}">
+          <span itemprop="name">{{ category_name }}</span>
+        </a>
+      </li>
+      <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <span itemprop="name" aria-current="page">{{ page.title | escape }}</span>
+      </li>
+    {% else %}
+      <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <span itemprop="name" aria-current="page">{{ page.title | escape }}</span>
+      </li>
+    {% endif %}
+  </ol>
+</nav>

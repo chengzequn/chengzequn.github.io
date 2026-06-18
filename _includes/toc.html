@@ -1,50 +1,59 @@
-<!-- 文章目录 -->
-{% if page.layout == 'post' or page.layout == 'page' %}
-  {% capture toc %}
-    {% assign h2s = content | split: '<h2' %}
-    {% if h2s.size > 1 or content contains '<h3' %}
-      <section class="sidebar-section">
-        <h3 class="sidebar-title">文章目录</h3>
-        <div class="toc-content">
-          <ul class="toc-list">
-            {% assign in_h2 = false %}
-            
-            {% assign all_headings = content | split: '<h' %}
-            {% for heading in all_headings %}
-              {% if heading contains '2' or heading contains '3' %}
-                {% assign heading_level = heading | slice: 0 %}
-                {% assign heading_content = heading | replace_first: heading_level, '' | split: '</h' | first | split: '>' | last %}
-                {% assign heading_id = heading_content | strip_html | downcase | replace: ' ', '-' | replace: '.', '' | replace: ',', '' | replace: '!', '' | replace: '?', '' | replace: ':', '' | replace: ';', '' | replace: '(', '' | replace: ')', '' %}
-                
-                {% if heading_level == '2' %}
-                  {% if in_h2 %}
-                    </ul>
-                  </li>
-                  {% endif %}
-                  <li class="toc-h2">
-                    <a href="#{{ heading_id }}" class="toc-link">
-                      {{ heading_content | strip_html }}
-                    </a>
-                    <ul class="toc-h3-list">
-                    {% assign in_h2 = true %}
-                {% elsif heading_level == '3' %}
-                  <li class="toc-h3">
-                    <a href="#{{ heading_id }}" class="toc-link">
-                      {{ heading_content | strip_html }}
-                    </a>
-                  </li>
-                {% endif %}
-              {% endif %}
-            {% endfor %}
-            
-            {% if in_h2 %}
-              </ul>
-            </li>
-            {% endif %}
-          </ul>
-        </div>
-      </section>
-    {% endif %}
-  {% endcapture %}
-  {{ toc }}
-{% endif %}
+{% comment %}
+动态文章目录 - 通过 JS 自动从 h2/h3 生成
+{% endcomment %}
+<nav class="toc" aria-label="文章目录">
+  <div class="toc-header" onclick="this.parentElement.classList.toggle('toc-collapsed')">
+    <span class="toc-title">📑 目录</span>
+    <span class="toc-toggle">▼</span>
+  </div>
+  <ul class="toc-list" id="toc-list"></ul>
+</nav>
+
+<script>
+(function() {
+  var headings = document.querySelectorAll('.post-content h2, .post-content h3');
+  if (headings.length < 2) return;
+
+  var toc = document.getElementById('toc-list');
+  var stack = [toc];
+  var prevLevel = 2;
+
+  headings.forEach(function(heading) {
+    // 确保标题有 id
+    if (!heading.id) {
+      heading.id = heading.textContent.trim()
+        .toLowerCase()
+        .replace(/\s+/g, '-')
+        .replace(/[^\w\u4e00-\u9fa5-]/g, '');
+    }
+
+    var level = parseInt(heading.tagName.charAt(1));
+    var li = document.createElement('li');
+    var a = document.createElement('a');
+    a.href = '#' + heading.id;
+    a.textContent = heading.textContent.trim();
+    a.className = 'toc-link';
+    li.appendChild(a);
+
+    if (level > prevLevel) {
+      var ul = document.createElement('ul');
+      if (stack[stack.length - 1].lastElementChild) {
+        stack[stack.length - 1].lastElementChild.appendChild(ul);
+      } else {
+        stack[stack.length - 1].appendChild(ul);
+      }
+      stack.push(ul);
+    } else if (level < prevLevel) {
+      while (stack.length > 1 && level < prevLevel) {
+        stack.pop();
+        prevLevel--;
+      }
+    }
+
+    stack[stack.length - 1].appendChild(li);
+    prevLevel = level;
+  });
+
+  toc.parentElement.style.display = 'block';
+})();
+</script>

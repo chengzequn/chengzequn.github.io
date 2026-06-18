@@ -13,11 +13,11 @@ permalink: /llms-full.txt
 
 这是程泽群的个人技术博客，旨在分享技术学习心得、项目经验和生活感悟。
 
-- **作者**：程泽群
+- **作者**：{{ site.author }}
 - **技术栈**：HTML / CSS / JavaScript / React / Vue / Python / Ruby / Node.js / MySQL / MongoDB / Redis / Git / VS Code / Docker
-- **GitHub**：[chengzequn](https://github.com/chengzequn)
-- **邮箱**：chengzequn@foxmail.com
-- **Twitter**：[@chengzequn](https://twitter.com/chengzequn)
+- **GitHub**：[{{ site.github_username }}](https://github.com/{{ site.github_username }})
+- **邮箱**：{{ site.email }}
+{% if site.twitter_username %}- **Twitter**：[@{{ site.twitter_username }}](https://twitter.com/{{ site.twitter_username }}){% endif %}
 
 ---
 

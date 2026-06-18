@@ -1,3 +1,7 @@
+---
+layout: null
+permalink: /robots.txt
+---
 # robots.txt for 程泽群的博客
 
 # 通用爬虫

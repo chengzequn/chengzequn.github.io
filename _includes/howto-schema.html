@@ -1,0 +1,21 @@
+{% if page.howto and page.howto.steps %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "{{ page.howto.name | default: page.title | escape }}",
+  "description": "{{ page.howto.description | default: page.seo_description | default: page.excerpt | strip_html | normalize_whitespace | truncate: 160 }}",
+  "totalTime": "PT{{ page.howto.steps.size | times: 5 }}M",
+  "step": [
+    {% for step in page.howto.steps %}
+    {
+      "@type": "HowToStep",
+      "position": {{ forloop.index }},
+      "name": "步骤 {{ forloop.index }}",
+      "text": "{{ step | escape }}"
+    }{% unless forloop.last %},{% endunless %}
+    {% endfor %}
+  ]
+}
+</script>
+{% endif %}

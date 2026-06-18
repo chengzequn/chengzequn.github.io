@@ -25,6 +25,10 @@ SEO模块 - 用于优化网站在搜索引擎和社交媒体中的展示
     <meta property="og:image" content="{{ page.image | absolute_url }}">
     <meta name="twitter:image" content="{{ page.image | absolute_url }}">
     <meta name="twitter:card" content="summary_large_image">
+  {% elsif site.default_image %}
+    <meta property="og:image" content="{{ site.default_image | absolute_url }}">
+    <meta name="twitter:image" content="{{ site.default_image | absolute_url }}">
+    <meta name="twitter:card" content="summary_large_image">
   {% elsif site.logo %}
     <meta property="og:image" content="{{ site.logo | absolute_url }}">
     <meta name="twitter:image" content="{{ site.logo | absolute_url }}">
@@ -47,28 +51,47 @@ SEO模块 - 用于优化网站在搜索引擎和社交媒体中的展示
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
-    "@type": "{% if page.layout == 'post' %}BlogPosting{% elsif page.layout == 'page' %}WebPage{% else %}Website{% endif %}",
-    "headline": "{{ page.title | default: site.title }}",
-    "description": "{{ page.excerpt | default: site.description | strip_html | normalize_whitespace | truncate: 160 }}",
+    {% if page.layout == 'post' %}
+    "@type": "BlogPosting",
+    "@id": "{{ page.url | absolute_url }}#article",
+    "headline": "{{ page.title | default: site.title | escape }}",
+    "description": "{{ page.excerpt | default: page.seo_description | default: site.description | strip_html | normalize_whitespace | truncate: 160 }}",
     "url": "{{ page.url | absolute_url }}",
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": "{{ page.url | absolute_url }}#webpage"
+    },
     {% if site.author %}
     "author": {
       "@type": "Person",
-      "name": "{{ site.author }}"
+      "name": "{{ site.author }}",
+      "url": "{{ site.url }}",
+      "sameAs": [
+        "https://github.com/{{ site.github_username }}"
+        {% if site.twitter_username %}, "https://twitter.com/{{ site.twitter_username }}"{% endif %}
+      ]
     },
     {% endif %}
-    "datePublished": "{{ page.date | default: site.time }}",
-    {% if page.modified_date %}
-    "dateModified": "{{ page.modified_date }}",
+    "datePublished": "{{ page.date | date_to_xmlschema }}",
+    {% if page.last_modified_at %}
+    "dateModified": "{{ page.last_modified_at | date_to_xmlschema }}",
+    {% elsif page.date %}
+    "dateModified": "{{ page.date | date_to_xmlschema }}",
     {% endif %}
     {% if page.image %}
     "image": "{{ page.image | absolute_url }}",
+    {% elsif site.default_image %}
+    "image": "{{ site.default_image | absolute_url }}",
     {% elsif site.logo %}
     "image": "{{ site.logo | absolute_url }}",
     {% endif %}
     {% if page.categories %}
-    "keywords": "{{ page.categories | join: ', ' }}",
+    "keywords": "{{ page.categories | join: ', ' }}, {{ page.tags | join: ', ' }}",
+    "articleSection": "{{ page.categories | first }}",
     {% endif %}
+    "wordCount": "{{ content | number_of_words }}",
+    "inLanguage": "{{ site.lang | default: 'zh-CN' }}",
+    "isAccessibleForFree": true,
     "publisher": {
       "@type": "Organization",
       "name": "{{ site.title }}",
@@ -77,6 +100,47 @@ SEO模块 - 用于优化网站在搜索引擎和社交媒体中的展示
         "url": "{{ site.logo | default: '/assets/images/logo.png' | absolute_url }}"
       }
     }
+    {% else %}
+    "@type": "{% if page.layout == 'page' %}WebPage{% elsif page.layout == 'home' %}Blog{% else %}Website{% endif %}",
+    "@id": "{{ page.url | absolute_url }}#webpage",
+    "headline": "{{ page.title | default: site.title | escape }}",
+    "description": "{{ page.excerpt | default: site.description | strip_html | normalize_whitespace | truncate: 160 }}",
+    "url": "{{ page.url | absolute_url }}",
+    {% if site.author %}
+    "author": {
+      "@type": "Person",
+      "name": "{{ site.author }}",
+      "url": "{{ site.url }}",
+      "sameAs": [
+        "https://github.com/{{ site.github_username }}"
+        {% if site.twitter_username %}, "https://twitter.com/{{ site.twitter_username }}"{% endif %}
+      ]
+    },
+    {% endif %}
+    "datePublished": "{{ page.date | default: site.time | date: '%Y-%m-%d' }}",
+    {% if page.modified_date %}
+    "dateModified": "{{ page.modified_date }}",
+    {% endif %}
+    {% if page.image %}
+    "image": "{{ page.image | absolute_url }}",
+    {% elsif site.default_image %}
+    "image": "{{ site.default_image | absolute_url }}",
+    {% elsif site.logo %}
+    "image": "{{ site.logo | absolute_url }}",
+    {% endif %}
+    {% if page.categories %}
+    "keywords": "{{ page.categories | join: ', ' }}",
+    {% endif %}
+    "inLanguage": "{{ site.lang | default: 'zh-CN' }}",
+    "publisher": {
+      "@type": "Organization",
+      "name": "{{ site.title }}",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "{{ site.logo | default: '/assets/images/logo.png' | absolute_url }}"
+      }
+    }
+    {% endif %}
   }
   </script>
   

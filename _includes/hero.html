@@ -4,7 +4,7 @@
     <!-- Background with Overlay -->
     <div class="hero-bg">
       <div class="hero-overlay"></div>
-      <img src="{{ "/assets/images/hero_bg.jpg" | relative_url }}" alt="Hero Background" class="hero-image" decoding="async"/>
+      <img src="{{ "/assets/images/hero_bg.jpg" | relative_url }}" alt="程泽群的博客 - 探索科技的无限可能" class="hero-image" decoding="async" loading="eager"/>
     </div>
     
     <!-- Hero Content -->
@@ -33,12 +33,12 @@
         <!-- Stats -->
         <div class="hero-stats">
           <div class="stat-item">
-            <span class="stat-number">50+</span>
+            <span class="stat-number">{{ site.posts | size }}+</span>
             <span class="stat-label">技术文章</span>
           </div>
           <div class="stat-item">
-            <span class="stat-number">10k+</span>
-            <span class="stat-label">读者访问</span>
+            <span class="stat-number">{{ site.data.tools | size }}+</span>
+            <span class="stat-label">在线工具</span>
           </div>
           <div class="stat-item">
             <span class="stat-number">24/7</span>

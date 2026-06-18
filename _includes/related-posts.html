@@ -1,0 +1,45 @@
+{% comment %}
+相关文章推荐模块 - 基于分类和标签匹配
+{% endcomment %}
+{% assign related_posts = '' | split: '' %}
+{% assign post_index = 0 %}
+
+{% comment %}优先匹配相同分类的文章{% endcomment %}
+{% for post in site.posts %}
+  {% if post.url != page.url %}
+    {% assign match_score = 0 %}
+    {% for category in page.categories %}
+      {% if post.categories contains category %}
+        {% assign match_score = match_score | plus: 10 %}
+      {% endif %}
+    {% endfor %}
+    {% for tag in page.tags %}
+      {% if post.tags contains tag %}
+        {% assign match_score = match_score | plus: 3 %}
+      {% endif %}
+    {% endfor %}
+    {% if match_score > 0 %}
+      {% assign related_posts = related_posts | push: post %}
+    {% endif %}
+  {% endif %}
+{% endfor %}
+
+{% comment %}取最多 3 篇相关文章{% endcomment %}
+{% assign related_posts = related_posts | slice: 0, 3 %}
+
+{% if related_posts.size > 0 %}
+<div class="related-posts">
+  <h3 class="related-posts-title">相关文章</h3>
+  <div class="related-posts-grid">
+    {% for post in related_posts %}
+    <a class="related-post-card" href="{{ post.url | relative_url }}">
+      <time class="related-post-date">{{ post.date | date: "%Y-%m-%d" }}</time>
+      <h4 class="related-post-title">{{ post.title | escape }}</h4>
+      {% if post.categories %}
+      <span class="related-post-category">{{ post.categories | first }}</span>
+      {% endif %}
+    </a>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
