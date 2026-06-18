@@ -16,6 +16,22 @@
   url: /tools/color-replace/
   external: false
 
+- name: 文档比对
+  icon: "📄"
+  description: Word / PDF / 文本文件逐字比对差异
+  url: /tools/doc-diff/
+  external: false
+
+- name: Plist 编辑器
+  icon: "📋"
+  description: 查看、编辑、保存 Info.plist（支持 XML / Binary）
+  url: /tools/plist-editor/
+  external: false
+
+
+
+
+
 
 
 

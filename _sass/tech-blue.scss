@@ -5882,3 +5882,641 @@ ul.contact-list {
   }
 }
 
+/* ========================================
+   文档比对
+   ======================================== */
+.dd-subtitle {
+  margin: -0.75rem 0 0;
+  font-size: 0.9rem;
+  color: $secondary-color;
+}
+
+/* 上传行 */
+.dd-upload-row {
+  display: flex;
+  align-items: stretch;
+  gap: 1rem;
+}
+
+.dd-upload-panel {
+  flex: 1;
+  min-width: 0;
+}
+
+.dd-vs-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: $secondary-color;
+  padding: 0 0.5rem;
+  flex-shrink: 0;
+  align-self: center;
+}
+
+.dd-upload-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid $border-color;
+  border-radius: 10px;
+  background: $card-background;
+
+  .dd-status {
+    flex: 1;
+    font-size: 0.85rem;
+    color: $secondary-color;
+  }
+}
+
+/* 文件信息 */
+.dd-file-info {
+  margin-top: 0.75rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.dd-file-info--loading {
+  background: lighten($accent-color, 38%);
+  color: $accent-color;
+}
+
+.dd-file-info--success {
+  background: lighten(#22c55e, 38%);
+  color: #166534;
+}
+
+.dd-file-info--error {
+  background: lighten(#ef4444, 32%);
+  color: #991b1b;
+}
+
+.dd-file-check {
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.dd-file-name {
+  font-weight: 600;
+}
+
+.dd-file-meta {
+  opacity: 0.7;
+  margin-left: auto;
+}
+
+/* 工作区 */
+.dd-workspace {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.dd-workspace-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.dd-status {
+  font-size: 0.85rem;
+  color: $secondary-color;
+  margin-left: auto;
+}
+
+/* 统计栏 */
+.dd-stats {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.dd-stat-item {
+  flex: 1;
+  min-width: 100px;
+  text-align: center;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  border: 1px solid $border-color;
+  background: $card-background;
+}
+
+.dd-stat-val {
+  display: block;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: $text-color;
+}
+
+.dd-stat-label {
+  display: block;
+  font-size: 0.72rem;
+  color: $secondary-color;
+  margin-top: 0.15rem;
+}
+
+.dd-stat-add .dd-stat-val {
+  color: #16a34a;
+}
+
+.dd-stat-del .dd-stat-val {
+  color: #dc2626;
+}
+
+/* 视图切换 */
+.dd-view-bar {
+  display: flex;
+  gap: 0.25rem;
+  padding: 0.25rem;
+  border-radius: 8px;
+  background: $card-background;
+  border: 1px solid $border-color;
+  width: fit-content;
+}
+
+.dd-view-btn {
+  padding: 0.4rem 1rem;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: $secondary-color;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+
+  &:hover {
+    color: $text-color;
+  }
+
+  &.active {
+    background: $accent-color;
+    color: $white;
+  }
+}
+
+/* 比对结果 */
+.dd-result {
+  border: 1px solid $border-color;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+/* 并排视图 */
+.dd-side-by-side {
+  display: flex;
+  min-height: 400px;
+}
+
+.dd-panel {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.dd-panel--left {
+  border-right: 1px solid $border-color;
+}
+
+.dd-panel-header {
+  padding: 0.6rem 1rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: $secondary-color;
+  background: $card-background;
+  border-bottom: 1px solid $border-color;
+  flex-shrink: 0;
+}
+
+.dd-panel-body {
+  flex: 1;
+  padding: 1rem;
+  font-size: 0.88rem;
+  line-height: 1.8;
+  color: $text-color;
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow: auto;
+  max-height: 550px;
+}
+
+/* Diff 高亮 */
+.dd-diff-add {
+  background: rgba(34, 197, 94, 0.2);
+  color: #166534;
+  border-radius: 2px;
+}
+
+.dd-diff-del {
+  background: rgba(239, 68, 68, 0.2);
+  color: #991b1b;
+  border-radius: 2px;
+  text-decoration: line-through;
+}
+
+.dd-diff-eq {
+  // unchanged
+}
+
+.dd-empty {
+  color: $secondary-color;
+  font-style: italic;
+}
+
+.dd-empty-msg {
+  padding: 3rem 2rem;
+  text-align: center;
+  color: $secondary-color;
+  font-size: 0.9rem;
+}
+
+/* 统一视图 */
+.dd-unified {
+  min-height: 400px;
+  display: flex;
+  flex-direction: column;
+
+  .dd-panel-header {
+    // already styled
+  }
+
+  .dd-panel-body {
+    max-height: 550px;
+    overflow: auto;
+  }
+}
+
+/* 加载 */
+.dd-loading {
+  text-align: center;
+  padding: 3rem 2rem;
+}
+
+.dd-spinner {
+  width: 40px;
+  height: 40px;
+  margin: 0 auto 1rem;
+  border: 3px solid $border-color;
+  border-top-color: $accent-color;
+  border-radius: 50%;
+  animation: ddSpin 0.7s linear infinite;
+}
+
+.dd-spinner-sm {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: ddSpin 0.7s linear infinite;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+@keyframes ddSpin {
+  to { transform: rotate(360deg); }
+}
+
+.dd-loading-text {
+  font-size: 0.9rem;
+  color: $secondary-color;
+  margin: 0;
+}
+
+/* 响应式 */
+@media (max-width: 780px) {
+  .dd-upload-row {
+    flex-direction: column;
+  }
+
+  .dd-vs-badge {
+    flex-direction: row;
+    padding: 0.5rem 0;
+  }
+
+  .dd-side-by-side {
+    flex-direction: column;
+  }
+
+  .dd-panel--left {
+    border-right: none;
+    border-bottom: 1px solid $border-color;
+  }
+
+  .dd-panel-body {
+    max-height: 350px;
+  }
+
+  .dd-file-meta {
+    margin-left: 0;
+    width: 100%;
+  }
+}
+
+/* ========================================
+   Plist 编辑器
+   ======================================== */
+.pl-subtitle {
+  margin: -0.75rem 0 0;
+  font-size: 0.9rem;
+  color: $secondary-color;
+}
+
+.pl-upload-row {
+  margin-bottom: 0.75rem;
+}
+
+.pl-file-info {
+  margin-top: 0.75rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  &--success {
+    background: lighten(#22c55e, 38%);
+    color: #166534;
+  }
+}
+
+.pl-paste-row {
+  margin-bottom: 1rem;
+}
+
+.pl-toggle-btn {
+  background: none;
+  border: 1px dashed $border-color;
+  border-radius: 8px;
+  padding: 0.6rem 1rem;
+  font-size: 0.82rem;
+  color: $secondary-color;
+  cursor: pointer;
+  width: 100%;
+  text-align: center;
+  font-family: inherit;
+  transition: all 0.2s;
+
+  &:hover {
+    border-color: $accent-color;
+    color: $accent-color;
+  }
+}
+
+.pl-paste-area {
+  margin-top: 0.6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+
+  textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid $border-color;
+    border-radius: 8px;
+    font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+    font-size: 0.8rem;
+    background: $card-background;
+    color: $text-color;
+    resize: vertical;
+  }
+}
+
+.pl-error {
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  background: lighten(#ef4444, 32%);
+  color: #991b1b;
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+}
+
+/* 工作区 */
+.pl-workspace {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.pl-header-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.pl-header-actions {
+  margin-left: auto;
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* 树形编辑器 */
+.pl-tree {
+  border: 1px solid $border-color;
+  border-radius: 10px;
+  background: $card-background;
+  padding: 0.5rem;
+  font-size: 0.85rem;
+  overflow: auto;
+  max-height: 600px;
+}
+
+.pl-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.4rem;
+  border-radius: 6px;
+  transition: background 0.15s;
+
+  &:hover {
+    background: rgba($accent-color, 0.05);
+  }
+}
+
+.pl-collapse-btn {
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: $secondary-color;
+  cursor: pointer;
+  font-size: 0.7rem;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  &:hover {
+    background: $border-color;
+  }
+}
+
+.pl-key {
+  font-weight: 600;
+  color: #2563eb;
+  min-width: 60px;
+  padding: 0.15rem 0.35rem;
+  border-radius: 4px;
+  outline: none;
+  white-space: nowrap;
+
+  &:focus {
+    background: rgba($accent-color, 0.1);
+    box-shadow: 0 0 0 1px $accent-color;
+  }
+
+  &--idx {
+    color: $secondary-color;
+    min-width: 30px;
+  }
+}
+
+.pl-type {
+  font-size: 0.7rem;
+  padding: 0.1rem 0.4rem;
+  border-radius: 3px;
+  background: $border-color;
+  color: $secondary-color;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.pl-val {
+  flex: 1;
+  color: $text-color;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  &--container {
+    color: $secondary-color;
+    font-style: italic;
+  }
+}
+
+.pl-input {
+  flex: 1;
+  padding: 0.2rem 0.4rem;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  color: $text-color;
+  font-size: 0.85rem;
+  font-family: inherit;
+  min-width: 80px;
+
+  &:hover {
+    border-color: $border-color;
+  }
+
+  &:focus {
+    outline: none;
+    border-color: $accent-color;
+    background: rgba($accent-color, 0.05);
+  }
+
+  &--num {
+    max-width: 120px;
+  }
+}
+
+.pl-del-btn {
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: $secondary-color;
+  cursor: pointer;
+  font-size: 1rem;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  opacity: 0;
+
+  .pl-row:hover & {
+    opacity: 1;
+  }
+
+  &:hover {
+    background: rgba(#ef4444, 0.15);
+    color: #ef4444;
+  }
+}
+
+.pl-children {
+  padding-left: 1.5rem;
+  border-left: 1px solid $border-color;
+  margin-left: 0.6rem;
+}
+
+.pl-add-row {
+  padding: 0.3rem 0.4rem;
+  padding-left: 2rem;
+}
+
+.pl-add-btn {
+  padding: 0.25rem 0.7rem;
+  border: 1px dashed $border-color;
+  border-radius: 5px;
+  background: none;
+  color: $secondary-color;
+  font-size: 0.78rem;
+  cursor: pointer;
+  font-family: inherit;
+
+  &:hover {
+    border-color: $accent-color;
+    color: $accent-color;
+    background: rgba($accent-color, 0.05);
+  }
+}
+
+.pl-loading {
+  text-align: center;
+  padding: 2rem;
+  color: $secondary-color;
+  font-size: 0.9rem;
+}
+
+/* 响应式 */
+@media (max-width: 780px) {
+  .pl-header-bar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .pl-header-actions {
+    margin-left: 0;
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .pl-tree {
+    max-height: 450px;
+  }
+
+  .pl-row {
+    flex-wrap: wrap;
+  }
+}
+

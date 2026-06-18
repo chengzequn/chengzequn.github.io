@@ -1,0 +1,442 @@
+---
+layout: default
+title: 文档比对
+permalink: /tools/doc-diff/
+---
+
+<article class="page h-entry">
+  <header class="page-header">
+    <a class="tool-back-link" href="{{ '/tools' | relative_url }}">← 返回工具集</a>
+    <h1 class="page-title p-name">文档比对</h1>
+    <p class="dd-subtitle">上传两份 Word / PDF / 文本文件，逐字比对差异</p>
+  </header>
+
+  <div class="tool-container">
+    <!-- 上传区 -->
+    <div class="dd-upload-row" id="uploadRow">
+      <div class="dd-upload-panel">
+        <div class="dd-upload-zone" id="uploadA">
+          <div class="cp-upload-icon">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="16" y1="13" x2="8" y2="13"/>
+              <line x1="16" y1="17" x2="8" y2="17"/>
+            </svg>
+          </div>
+          <p class="cp-upload-text">文档 A（原版）</p>
+          <p class="cp-upload-hint">支持 .docx / .pdf / .txt</p>
+          <input type="file" id="fileA" accept=".docx,.pdf,.txt,text/plain" hidden>
+        </div>
+        <div class="dd-file-info" id="infoA" style="display:none;"></div>
+      </div>
+
+      <div class="dd-vs-badge">VS</div>
+
+      <div class="dd-upload-panel">
+        <div class="dd-upload-zone" id="uploadB">
+          <div class="cp-upload-icon">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="16" y1="13" x2="8" y2="13"/>
+              <line x1="16" y1="17" x2="8" y2="17"/>
+            </svg>
+          </div>
+          <p class="cp-upload-text">文档 B（新版）</p>
+          <p class="cp-upload-hint">支持 .docx / .pdf / .txt</p>
+          <input type="file" id="fileB" accept=".docx,.pdf,.txt,text/plain" hidden>
+        </div>
+        <div class="dd-file-info" id="infoB" style="display:none;"></div>
+      </div>
+    </div>
+
+    <!-- 上传状态 & 比对按钮 -->
+    <div class="dd-upload-actions" id="uploadActions" style="display:none;">
+      <span class="dd-status" id="uploadStatus"></span>
+      <button class="tool-btn tool-btn-primary" id="uploadCompareBtn">开始比对</button>
+    </div>
+
+    <!-- 工作区（比对结果） -->
+    <div class="dd-workspace" id="workspace" style="display:none;">
+      <div class="dd-workspace-header">
+        <button class="tool-btn" id="reuploadBtn">← 重新选择</button>
+        <span class="dd-status" id="statusText"></span>
+      </div>
+
+      <!-- 统计栏 -->
+      <div class="dd-stats" id="statsBar" style="display:none;">
+        <div class="dd-stat-item">
+          <span class="dd-stat-val" id="statSimilarity">—</span>
+          <span class="dd-stat-label">相似度</span>
+        </div>
+        <div class="dd-stat-item dd-stat-add">
+          <span class="dd-stat-val" id="statAdded">—</span>
+          <span class="dd-stat-label">新增</span>
+        </div>
+        <div class="dd-stat-item dd-stat-del">
+          <span class="dd-stat-val" id="statDeleted">—</span>
+          <span class="dd-stat-label">删除</span>
+        </div>
+        <div class="dd-stat-item">
+          <span class="dd-stat-val" id="statChanged">—</span>
+          <span class="dd-stat-label">变动词数</span>
+        </div>
+      </div>
+
+      <!-- 视图切换 -->
+      <div class="dd-view-bar" id="viewBar" style="display:none;">
+        <button class="dd-view-btn active" data-view="side">并排对比</button>
+        <button class="dd-view-btn" data-view="unified">统一视图</button>
+      </div>
+
+      <!-- 比对结果 -->
+      <div class="dd-result" id="resultContainer" style="display:none;">
+        <!-- 并排视图 -->
+        <div class="dd-side-by-side" id="sideView">
+          <div class="dd-panel dd-panel--left">
+            <div class="dd-panel-header">文档 A（原版）</div>
+            <div class="dd-panel-body" id="sideLeft"></div>
+          </div>
+          <div class="dd-panel dd-panel--right">
+            <div class="dd-panel-header">文档 B（新版）</div>
+            <div class="dd-panel-body" id="sideRight"></div>
+          </div>
+        </div>
+        <!-- 统一视图 -->
+        <div class="dd-unified" id="unifiedView" style="display:none;">
+          <div class="dd-panel-header">比对结果</div>
+          <div class="dd-panel-body" id="unifiedBody"></div>
+        </div>
+      </div>
+
+      <!-- 加载状态 -->
+      <div class="dd-loading" id="loadingBox" style="display:none;">
+        <div class="dd-spinner"></div>
+        <p class="dd-loading-text" id="loadingText">正在提取文本...</p>
+      </div>
+    </div>
+  </div>
+</article>
+
+<script src="https://cdn.jsdelivr.net/npm/mammoth@1.8.0/mammoth.browser.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/diff@7.0.0/dist/diff.min.js"></script>
+<script>
+(function() {
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
+
+  var uploadRow = document.getElementById('uploadRow');
+  var workspace = document.getElementById('workspace');
+  var uploadA = document.getElementById('uploadA');
+  var uploadB = document.getElementById('uploadB');
+  var fileA = document.getElementById('fileA');
+  var fileB = document.getElementById('fileB');
+  var infoA = document.getElementById('infoA');
+  var infoB = document.getElementById('infoB');
+  var statusText = document.getElementById('statusText');
+  var loadingBox = document.getElementById('loadingBox');
+  var loadingText = document.getElementById('loadingText');
+  var statsBar = document.getElementById('statsBar');
+  var viewBar = document.getElementById('viewBar');
+  var resultContainer = document.getElementById('resultContainer');
+  var sideView = document.getElementById('sideView');
+  var unifiedView = document.getElementById('unifiedView');
+  var sideLeft = document.getElementById('sideLeft');
+  var sideRight = document.getElementById('sideRight');
+  var unifiedBody = document.getElementById('unifiedBody');
+
+  var textA = '', textB = '';
+  var fileNameA = '', fileNameB = '';
+  var loadedA = false, loadedB = false;
+
+  var uploadActions = document.getElementById('uploadActions');
+  var uploadStatus = document.getElementById('uploadStatus');
+  var uploadCompareBtn = document.getElementById('uploadCompareBtn');
+
+  // --- 上传事件 ---
+  function setupUpload(zone, input, infoEl, side) {
+    zone.addEventListener('click', function() { input.click(); });
+    input.addEventListener('change', function(e) {
+      if (e.target.files.length) loadFile(e.target.files[0], side);
+    });
+    zone.addEventListener('dragover', function(e) {
+      e.preventDefault();
+      zone.classList.add('cp-upload-zone--active');
+    });
+    zone.addEventListener('dragleave', function() {
+      zone.classList.remove('cp-upload-zone--active');
+    });
+    zone.addEventListener('drop', function(e) {
+      e.preventDefault();
+      zone.classList.remove('cp-upload-zone--active');
+      if (e.dataTransfer.files.length) loadFile(e.dataTransfer.files[0], side);
+    });
+  }
+
+  setupUpload(uploadA, fileA, infoA, 'A');
+  setupUpload(uploadB, fileB, infoB, 'B');
+
+  // --- 文件加载 ---
+  async function loadFile(file, side) {
+    var ext = file.name.split('.').pop().toLowerCase();
+    var infoEl = side === 'A' ? infoA : infoB;
+
+    infoEl.style.display = 'flex';
+    infoEl.innerHTML = '<span class="dd-spinner-sm"></span> 解析中...';
+    infoEl.className = 'dd-file-info dd-file-info--loading';
+
+    var text = '';
+    try {
+      if (ext === 'docx') {
+        text = await extractDocx(file);
+      } else if (ext === 'pdf') {
+        text = await extractPdf(file);
+      } else {
+        text = await extractText(file);
+      }
+    } catch (err) {
+      infoEl.innerHTML = '⚠ 解析失败: ' + err.message;
+      infoEl.className = 'dd-file-info dd-file-info--error';
+      return;
+    }
+
+    if (side === 'A') {
+      textA = text; fileNameA = file.name; loadedA = true;
+    } else {
+      textB = text; fileNameB = file.name; loadedB = true;
+    }
+
+    var wordCount = text.trim() ? text.trim().split(/\s+/).length : 0;
+    infoEl.innerHTML =
+      '<span class="dd-file-check">✓</span> ' +
+      '<span class="dd-file-name">' + escapeHtml(file.name) + '</span>' +
+      '<span class="dd-file-meta">' + formatSize(file.size) + ' · ' + wordCount + ' 词</span>';
+    infoEl.className = 'dd-file-info dd-file-info--success';
+
+    checkReady();
+  }
+
+  function checkReady() {
+    if (loadedA && loadedB) {
+      uploadActions.style.display = 'flex';
+      uploadStatus.textContent = '两份文档已就绪';
+    } else if (loadedA || loadedB) {
+      uploadActions.style.display = 'flex';
+      uploadStatus.textContent = '已加载 1/2 份文档，请继续上传另一份';
+    }
+  }
+
+  // --- 比对按钮（上传区） ---
+  uploadCompareBtn.addEventListener('click', function() {
+    uploadRow.style.display = 'none';
+    uploadActions.style.display = 'none';
+    workspace.style.display = 'flex';
+    statusText.textContent = '比对中...';
+    runDiff();
+  });
+
+  // --- 文本提取 ---
+  function extractDocx(file) {
+    return new Promise(function(resolve, reject) {
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        mammoth.extractRawText({ arrayBuffer: e.target.result })
+          .then(function(result) { resolve(result.value); })
+          .catch(reject);
+      };
+      reader.onerror = reject;
+      reader.readAsArrayBuffer(file);
+    });
+  }
+
+  async function extractPdf(file) {
+    var arrayBuf = await file.arrayBuffer();
+    var pdf = await pdfjsLib.getDocument({ data: arrayBuf }).promise;
+    var texts = [];
+    for (var i = 1; i <= pdf.numPages; i++) {
+      var page = await pdf.getPage(i);
+      var content = await page.getTextContent();
+      var pageText = content.items.map(function(item) { return item.str; }).join(' ');
+      texts.push(pageText);
+    }
+    return texts.join('\n\n');
+  }
+
+  function extractText(file) {
+    return new Promise(function(resolve, reject) {
+      var reader = new FileReader();
+      reader.onload = function(e) { resolve(e.target.result); };
+      reader.onerror = reject;
+      reader.readAsText(file);
+    });
+  }
+
+  // --- 比对逻辑 ---
+  function runDiff() {
+    if (!textA.trim() && !textB.trim()) {
+      statusText.textContent = '两份文档均为空';
+      return;
+    }
+    if (textA === textB) {
+      showEmptyDiff();
+      return;
+    }
+
+    statsBar.style.display = 'flex';
+    viewBar.style.display = 'flex';
+    resultContainer.style.display = 'block';
+
+    // 使用 word-level diff
+    var diffs = Diff.diffWords(textA, textB);
+
+    // 统计
+    var addedWords = 0, deletedWords = 0, unchangedWords = 0;
+    diffs.forEach(function(d) {
+      var wc = d.value.trim() ? d.value.trim().split(/\s+/).length : 0;
+      if (d.added) addedWords += wc;
+      else if (d.removed) deletedWords += wc;
+      else unchangedWords += wc;
+    });
+    var totalWords = unchangedWords + addedWords + deletedWords;
+    var similarity = totalWords > 0 ? Math.round((unchangedWords / totalWords) * 100) : 100;
+
+    document.getElementById('statSimilarity').textContent = similarity + '%';
+    document.getElementById('statAdded').textContent = '+' + addedWords;
+    document.getElementById('statDeleted').textContent = '-' + deletedWords;
+    document.getElementById('statChanged').textContent = addedWords + deletedWords;
+
+    // 渲染并排视图
+    renderSideBySide(diffs);
+    // 渲染统一视图
+    renderUnified(diffs);
+
+    // 默认显示并排
+    sideView.style.display = 'flex';
+    unifiedView.style.display = 'none';
+    document.querySelectorAll('.dd-view-btn').forEach(function(b) {
+      b.classList.toggle('active', b.dataset.view === 'side');
+    });
+
+    statusText.textContent = '比对完成';
+  }
+
+  function showEmptyDiff() {
+    statsBar.style.display = 'flex';
+    viewBar.style.display = 'none';
+    resultContainer.style.display = 'block';
+    document.getElementById('statSimilarity').textContent = '100%';
+    document.getElementById('statAdded').textContent = '0';
+    document.getElementById('statDeleted').textContent = '0';
+    document.getElementById('statChanged').textContent = '0';
+    sideLeft.innerHTML = '<div class="dd-empty-msg">两份文档内容完全一致</div>';
+    sideRight.innerHTML = '<div class="dd-empty-msg">两份文档内容完全一致</div>';
+    sideView.style.display = 'flex';
+    unifiedView.style.display = 'none';
+    statusText.textContent = '比对完成 — 内容完全一致';
+  }
+
+  function renderSideBySide(diffs) {
+    var leftHtml = '', rightHtml = '';
+    diffs.forEach(function(d) {
+      var escaped = escapeHtml(d.value);
+      if (d.removed) {
+        leftHtml += '<span class="dd-diff-del">' + escaped + '</span>';
+      } else if (d.added) {
+        rightHtml += '<span class="dd-diff-add">' + escaped + '</span>';
+      } else {
+        leftHtml += '<span class="dd-diff-eq">' + escaped + '</span>';
+        rightHtml += '<span class="dd-diff-eq">' + escaped + '</span>';
+      }
+    });
+
+    sideLeft.innerHTML = leftHtml || '<span class="dd-empty">（无内容）</span>';
+    sideRight.innerHTML = rightHtml || '<span class="dd-empty">（无内容）</span>';
+
+    // 同步滚动
+    syncScroll(sideLeft.parentElement, sideRight.parentElement);
+  }
+
+  function renderUnified(diffs) {
+    var html = '';
+    diffs.forEach(function(d) {
+      var escaped = escapeHtml(d.value);
+      if (d.removed) {
+        html += '<span class="dd-diff-del">' + escaped + '</span>';
+      } else if (d.added) {
+        html += '<span class="dd-diff-add">' + escaped + '</span>';
+      } else {
+        html += '<span class="dd-diff-eq">' + escaped + '</span>';
+      }
+    });
+    unifiedBody.innerHTML = html || '<span class="dd-empty">（无内容）</span>';
+  }
+
+  function syncScroll(leftPanel, rightPanel) {
+    if (!leftPanel || !rightPanel) return;
+    var leftBody = leftPanel.querySelector('.dd-panel-body');
+    var rightBody = rightPanel.querySelector('.dd-panel-body');
+    if (!leftBody || !rightBody) return;
+
+    var syncing = false;
+    leftBody.addEventListener('scroll', function() {
+      if (syncing) return;
+      syncing = true;
+      rightBody.scrollTop = leftBody.scrollTop;
+      rightBody.scrollLeft = leftBody.scrollLeft;
+      requestAnimationFrame(function() { syncing = false; });
+    });
+    rightBody.addEventListener('scroll', function() {
+      if (syncing) return;
+      syncing = true;
+      leftBody.scrollTop = rightBody.scrollTop;
+      leftBody.scrollLeft = rightBody.scrollLeft;
+      requestAnimationFrame(function() { syncing = false; });
+    });
+  }
+
+  // --- 视图切换 ---
+  viewBar.addEventListener('click', function(e) {
+    var btn = e.target.closest('.dd-view-btn');
+    if (!btn) return;
+    document.querySelectorAll('.dd-view-btn').forEach(function(b) { b.classList.remove('active'); });
+    btn.classList.add('active');
+    var v = btn.dataset.view;
+    sideView.style.display = v === 'side' ? 'flex' : 'none';
+    unifiedView.style.display = v === 'unified' ? 'block' : 'none';
+  });
+
+  // --- 重新选择 ---
+  document.getElementById('reuploadBtn').addEventListener('click', function() {
+    workspace.style.display = 'none';
+    uploadRow.style.display = 'flex';
+    textA = textB = '';
+    loadedA = loadedB = false;
+    fileA.value = ''; fileB.value = '';
+    infoA.style.display = 'none'; infoB.style.display = 'none';
+    uploadActions.style.display = 'none';
+    statsBar.style.display = 'none';
+    viewBar.style.display = 'none';
+    resultContainer.style.display = 'none';
+    sideLeft.innerHTML = '';
+    sideRight.innerHTML = '';
+    unifiedBody.innerHTML = '';
+  });
+
+  // --- 工具函数 ---
+  function escapeHtml(str) {
+    return str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/\n/g, '<br>');
+  }
+
+  function formatSize(bytes) {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / 1024 / 1024).toFixed(1) + ' MB';
+  }
+})();
+</script>

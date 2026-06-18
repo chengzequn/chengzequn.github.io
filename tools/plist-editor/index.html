@@ -1,0 +1,837 @@
+---
+layout: default
+title: Plist 编辑器
+permalink: /tools/plist-editor/
+---
+
+<article class="page h-entry">
+  <header class="page-header">
+    <a class="tool-back-link" href="{{ '/tools' | relative_url }}">← 返回工具集</a>
+    <h1 class="page-title p-name">Plist 编辑器</h1>
+    <p class="pl-subtitle">查看、编辑、保存 Info.plist 等属性列表文件（支持 XML 和 Binary 格式）</p>
+  </header>
+
+  <div class="tool-container">
+    <!-- 上传区 -->
+    <div class="pl-upload-row">
+      <div class="pl-upload-zone" id="uploadZone">
+        <div class="cp-upload-icon">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+            <line x1="16" y1="13" x2="8" y2="13"/>
+            <line x1="16" y1="17" x2="8" y2="17"/>
+          </svg>
+        </div>
+        <p class="cp-upload-text">拖拽 .plist 文件到此处，或点击上传</p>
+        <p class="cp-upload-hint">支持 XML 和 Binary 格式 plist</p>
+        <input type="file" id="fileInput" accept=".plist" hidden>
+      </div>
+      <div class="pl-file-info" id="fileInfo" style="display:none;"></div>
+    </div>
+
+    <!-- 粘贴区 -->
+    <div class="pl-paste-row">
+      <button class="pl-toggle-btn" id="pasteToggle">或粘贴 XML 内容 ▼</button>
+      <div class="pl-paste-area" id="pasteArea" style="display:none;">
+        <textarea id="plistXml" placeholder="在此粘贴 plist XML 内容..." rows="6"></textarea>
+        <button class="tool-btn tool-btn-primary" id="parseXmlBtn">解析</button>
+      </div>
+    </div>
+
+    <!-- 错误提示 -->
+    <div class="pl-error" id="errorBox" style="display:none;"></div>
+
+    <!-- 编辑器工作区 -->
+    <div class="pl-workspace" id="workspace" style="display:none;">
+      <div class="pl-header-bar">
+        <button class="tool-btn" id="reuploadBtn">← 重新打开</button>
+        <button class="tool-btn tool-btn-primary" id="addRootBtn">+ 添加项</button>
+        <div class="pl-header-actions">
+          <button class="tool-btn" id="collapseAllBtn">折叠全部</button>
+          <button class="tool-btn" id="expandAllBtn">展开全部</button>
+          <button class="tool-btn tool-btn-primary" id="downloadBtn">下载 .plist</button>
+        </div>
+      </div>
+      <div class="pl-tree" id="treeRoot"></div>
+    </div>
+
+    <!-- 加载中 -->
+    <div class="pl-loading" id="loadingBox" style="display:none;">
+      <div class="dd-spinner"></div>
+      <p>正在解析文件...</p>
+    </div>
+  </div>
+</article>
+
+<script>
+(function() {
+  var uploadZone = document.getElementById('uploadZone');
+  var fileInput = document.getElementById('fileInput');
+  var fileInfo = document.getElementById('fileInfo');
+  var pasteToggle = document.getElementById('pasteToggle');
+  var pasteArea = document.getElementById('pasteArea');
+  var plistXml = document.getElementById('plistXml');
+  var parseXmlBtn = document.getElementById('parseXmlBtn');
+  var errorBox = document.getElementById('errorBox');
+  var workspace = document.getElementById('workspace');
+  var treeRoot = document.getElementById('treeRoot');
+  var loadingBox = document.getElementById('loadingBox');
+  var downloadBtn = document.getElementById('downloadBtn');
+
+  var plistData = null; // parsed plist as JS object
+
+  // ======================= Plist 解析器 =======================
+
+  // Binary plist parser
+  function parseBinaryPlist(buffer) {
+    var dv = new DataView(buffer);
+    if (buffer.byteLength < 40) throw new Error('文件太短');
+
+    // Verify magic
+    var magic = String.fromCharCode.apply(null, new Uint8Array(buffer, 0, 8));
+    if (magic !== 'bplist00') throw new Error('不是有效的 Binary Plist');
+
+    // Read trailer (last 32 bytes)
+    var trailerStart = buffer.byteLength - 32;
+    // bytes 0-5: unused
+    var offsetSize = dv.getUint8(trailerStart + 6);
+    var objRefSize = dv.getUint8(trailerStart + 7);
+    var numObjects = readBigUint(dv, trailerStart + 8, 8);
+    var topObject = readBigUint(dv, trailerStart + 16, 8);
+    var offsetTableOffset = readBigUint(dv, trailerStart + 24, 8);
+
+    // Read offset table
+    var offsets = [];
+    for (var i = 0; i < numObjects; i++) {
+      offsets.push(readBigUint(dv, offsetTableOffset + i * offsetSize, offsetSize));
+    }
+    offsets.push(buffer.byteLength); // sentinel
+
+    function readBigUint(dv, pos, size) {
+      var val = 0;
+      for (var j = 0; j < size; j++) {
+        val = (val << 8) | dv.getUint8(pos + j);
+      }
+      return val;
+    }
+
+    function getObjectSize(index) {
+      if (index >= offsets.length - 1) return buffer.byteLength - offsets[index];
+      return offsets[index + 1] - offsets[index];
+    }
+
+    function parseObject(index) {
+      var pos = offsets[index];
+      var marker = dv.getUint8(pos);
+      var type = marker >> 4;
+      var extra = marker & 0xF;
+      pos++;
+
+      function readLength() {
+        var len = extra;
+        if (extra === 0xF) {
+          var lenMarker = dv.getUint8(pos);
+          var lenType = lenMarker >> 4;
+          var lenExtra = lenMarker & 0xF;
+          pos++;
+          if (lenType === 1) {
+            len = readBigUint(dv, pos, 1 << lenExtra);
+            pos += 1 << lenExtra;
+          } else {
+            len = readBigUint(dv, pos, lenExtra || 1);
+            pos += lenExtra || 1;
+          }
+        }
+        return len;
+      }
+
+      // 0: null/bool/fill
+      if (type === 0) {
+        if (extra === 0) return null;
+        if (extra === 8) return false;
+        if (extra === 9) return true;
+        if (extra === 15) return null; // fill
+        return null;
+      }
+
+      // 1: integer
+      if (type === 1) {
+        var numBytes = 1 << extra;
+        // For signed integers
+        if (numBytes === 1) return dv.getInt8(pos);
+        if (numBytes === 2) return dv.getInt16(pos, false);
+        if (numBytes === 4) return dv.getInt32(pos, false);
+        if (numBytes === 8) {
+          // 8-byte signed - read as two 32-bit
+          var hi = dv.getInt32(pos, false);
+          var lo = dv.getUint32(pos + 4, false);
+          return hi * 0x100000000 + lo;
+        }
+        return readBigUint(dv, pos, numBytes);
+      }
+
+      // 2: real
+      if (type === 2) {
+        if (extra === 0) return dv.getFloat32(pos, false);
+        if (extra === 1) return dv.getFloat64(pos, false);
+        // extra === 2: arbitrary length float, rare
+        return 0;
+      }
+
+      // 3: date
+      if (type === 3) {
+        var secs = dv.getFloat64(pos, false);
+        // Apple epoch: 2001-01-01 (978307200 seconds after Unix epoch)
+        return new Date((secs + 978307200) * 1000).toISOString();
+      }
+
+      // 4: data
+      if (type === 4) {
+        var len = readLength();
+        var bytes = new Uint8Array(buffer, pos, len);
+        return btoa(String.fromCharCode.apply(null, bytes));
+      }
+
+      // 5: ASCII string
+      if (type === 5) {
+        var len = readLength();
+        var chars = [];
+        for (var j = 0; j < len; j++) {
+          chars.push(String.fromCharCode(dv.getUint8(pos + j)));
+        }
+        return chars.join('');
+      }
+
+      // 6: UTF-16 BE string
+      if (type === 6) {
+        var len = readLength();
+        var chars = [];
+        for (var j = 0; j < len; j++) {
+          chars.push(String.fromCharCode(dv.getUint16(pos + j * 2, false)));
+        }
+        return chars.join('');
+      }
+
+      // 8: UID
+      if (type === 8) {
+        var size = extra + 1;
+        return { __uid: readBigUint(dv, pos, size) };
+      }
+
+      // A: array
+      if (type === 0xA) {
+        var len = readLength();
+        var arr = [];
+        for (var j = 0; j < len; j++) {
+          var refIndex = readBigUint(dv, pos + j * objRefSize, objRefSize);
+          arr.push(parseObject(refIndex));
+        }
+        return arr;
+      }
+
+      // D: dict
+      if (type === 0xD) {
+        var len = readLength();
+        var dict = {};
+        for (var j = 0; j < len; j++) {
+          var keyRef = readBigUint(dv, pos + j * objRefSize, objRefSize);
+          var valRef = readBigUint(dv, pos + (j + len) * objRefSize, objRefSize);
+          dict[parseObject(keyRef)] = parseObject(valRef);
+        }
+        return dict;
+      }
+
+      throw new Error('Unknown plist type: 0x' + type.toString(16));
+    }
+
+    return parseObject(topObject);
+  }
+
+  // XML plist parser
+  function parseXmlPlist(xmlString) {
+    var parser = new DOMParser();
+    var doc = parser.parseFromString(xmlString, 'text/xml');
+    var err = doc.querySelector('parsererror');
+    if (err) throw new Error('XML 解析错误: ' + err.textContent);
+
+    var root = doc.documentElement;
+    if (root.tagName !== 'plist') throw new Error('不是有效的 plist XML（缺少 &lt;plist&gt; 根节点）');
+
+    var top = root.firstElementChild;
+    if (!top) throw new Error('plist 节点下无内容');
+
+    return parseXmlNode(top);
+  }
+
+  function parseXmlNode(el) {
+    switch (el.tagName) {
+      case 'dict':
+        var obj = {};
+        var key = null;
+        for (var i = 0; i < el.children.length; i++) {
+          var child = el.children[i];
+          if (child.tagName === 'key') {
+            key = child.textContent;
+          } else if (key !== null) {
+            obj[key] = parseXmlNode(child);
+            key = null;
+          }
+        }
+        return obj;
+
+      case 'array':
+        var arr = [];
+        for (var i = 0; i < el.children.length; i++) {
+          arr.push(parseXmlNode(el.children[i]));
+        }
+        return arr;
+
+      case 'string':
+        return el.textContent || '';
+
+      case 'integer':
+        return parseInt(el.textContent, 10);
+
+      case 'real':
+        return parseFloat(el.textContent);
+
+      case 'true':
+        return true;
+
+      case 'false':
+        return false;
+
+      case 'date':
+        return el.textContent || '';
+
+      case 'data':
+        return el.textContent ? el.textContent.trim() : '';
+
+      default:
+        return el.textContent || '';
+    }
+  }
+
+  // ======================= Plist 序列化器 =======================
+
+  function plistToXml(obj, indent) {
+    indent = indent || 0;
+    var sp = '  '.repeat(indent);
+    var sp2 = '  '.repeat(indent + 1);
+
+    if (obj === null || obj === undefined) {
+      return sp + '<string></string>';
+    }
+
+    if (typeof obj === 'boolean') {
+      return sp + (obj ? '<true/>' : '<false/>');
+    }
+
+    if (typeof obj === 'number') {
+      if (Number.isInteger(obj)) {
+        return sp + '<integer>' + obj + '</integer>';
+      }
+      return sp + '<real>' + obj + '</real>';
+    }
+
+    if (typeof obj === 'string') {
+      if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(obj)) {
+        return sp + '<date>' + obj + '</date>';
+      }
+      return sp + '<string>' + escapeXml(obj) + '</string>';
+    }
+
+    if (Array.isArray(obj)) {
+      if (obj.length === 0) return sp + '<array/>';
+      var lines = [sp + '<array>'];
+      for (var i = 0; i < obj.length; i++) {
+        lines.push(plistToXml(obj[i], indent + 1));
+      }
+      lines.push(sp + '</array>');
+      return lines.join('\n');
+    }
+
+    if (typeof obj === 'object') {
+      var keys = Object.keys(obj);
+      if (keys.length === 0) return sp + '<dict/>';
+      var lines = [sp + '<dict>'];
+      for (var i = 0; i < keys.length; i++) {
+        lines.push(sp2 + '<key>' + escapeXml(keys[i]) + '</key>');
+        lines.push(plistToXml(obj[keys[i]], indent + 1));
+      }
+      lines.push(sp + '</dict>');
+      return lines.join('\n');
+    }
+
+    return sp + '<string>' + escapeXml(String(obj)) + '</string>';
+  }
+
+  function escapeXml(str) {
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  function buildPlistXml(obj) {
+    return [
+      '<?xml version="1.0" encoding="UTF-8"?>',
+      '<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">',
+      '<plist version="1.0">',
+      plistToXml(obj, 0),
+      '</plist>'
+    ].join('\n');
+  }
+
+  // ======================= 类型判断与 UI  =======================
+
+  function inferType(val) {
+    if (val === null || val === undefined) return 'string';
+    if (typeof val === 'boolean') return 'boolean';
+    if (typeof val === 'number') return Number.isInteger(val) ? 'integer' : 'real';
+    if (typeof val === 'string') return 'string';
+    if (Array.isArray(val)) return 'array';
+    if (typeof val === 'object') return 'dict';
+    return 'string';
+  }
+
+  function displayLabel(val, type) {
+    type = type || inferType(val);
+    if (type === 'boolean') return val ? 'YES' : 'NO';
+    if (type === 'dict') return '{' + Object.keys(val).length + ' 项}';
+    if (type === 'array') return '[' + val.length + ' 项]';
+    if (type === 'string') return val;
+    if (type === 'integer' || type === 'real') return String(val);
+    return String(val);
+  }
+
+  function typeGroup(type) {
+    // simple types are leaf nodes, complex are container nodes
+    if (type === 'dict' || type === 'array') return 'container';
+    return 'leaf';
+  }
+
+  // ======================= 编辑器树渲染 =======================
+
+  function renderTree() {
+    treeRoot.innerHTML = '';
+    if (!plistData) return;
+
+    // Root is always a dict for info.plist, but could be array
+    if (Array.isArray(plistData)) {
+      renderArray(treeRoot, plistData, [], 'root');
+    } else if (typeof plistData === 'object' && plistData !== null) {
+      renderDict(treeRoot, plistData, []);
+    }
+    // Re-attach value-editor input handlers after every re-render
+    attachInputHandlers();
+  }
+
+  function renderDict(parent, obj, path) {
+    var keys = Object.keys(obj);
+    var id = 'pl-' + path.join('-');
+
+    for (var i = 0; i < keys.length; i++) {
+      var key = keys[i];
+      var val = obj[key];
+      var valType = inferType(val);
+      var childPath = path.concat(key);
+      var isContainer = valType === 'dict' || valType === 'array';
+
+      var row = document.createElement('div');
+      row.className = 'pl-row';
+
+      // 折叠按钮（容器才有）
+      var toggleBtn = '';
+      if (isContainer) {
+        var collapseId = id + '-' + i;
+        row.innerHTML =
+          '<button class="pl-collapse-btn" data-target="' + collapseId + '">▼</button>' +
+          '<span class="pl-key" contenteditable="true">' + escapeXml(key) + '</span>' +
+          '<span class="pl-type">dict</span>' +
+          '<span class="pl-val pl-val--container">' + displayLabel(val, valType) + '</span>' +
+          '<button class="pl-del-btn" title="删除">×</button>';
+        row.querySelector('.pl-key').addEventListener('blur', makeKeyRename(obj, key));
+        row.querySelector('.pl-key').addEventListener('keydown', preventNewline);
+
+        var childContainer = document.createElement('div');
+        childContainer.className = 'pl-children';
+        childContainer.id = collapseId;
+        if (valType === 'dict') {
+          renderDict(childContainer, val, childPath);
+        } else if (valType === 'array') {
+          renderArray(childContainer, val, childPath, collapseId);
+        }
+
+        row.querySelector('.pl-collapse-btn').addEventListener('click', function() {
+          var c = childContainer;
+          var btn = this;
+          if (c.style.display === 'none') {
+            c.style.display = 'block';
+            btn.textContent = '▼';
+          } else {
+            c.style.display = 'none';
+            btn.textContent = '▶';
+          }
+        });
+        row.querySelector('.pl-del-btn').addEventListener('click', makeDictRemove(obj, key));
+
+        parent.appendChild(row);
+        parent.appendChild(childContainer);
+
+      } else {
+        // 叶子节点
+        row.innerHTML =
+          '<span class="pl-key" contenteditable="true">' + escapeXml(key) + '</span>' +
+          '<span class="pl-type">' + valType + '</span>' +
+          buildValueEditor(childPath, val, valType) +
+          '<button class="pl-del-btn" title="删除">×</button>';
+        row.querySelector('.pl-key').addEventListener('blur', makeKeyRename(obj, key));
+        row.querySelector('.pl-key').addEventListener('keydown', preventNewline);
+        row.querySelector('.pl-del-btn').addEventListener('click', makeDictRemove(obj, key));
+        parent.appendChild(row);
+      }
+    }
+
+    // 在 dict 末尾添加"新增"行
+    var addRow = document.createElement('div');
+    addRow.className = 'pl-add-row';
+    addRow.innerHTML =
+      '<button class="pl-add-btn">+ 添加字段</button>';
+    addRow.querySelector('.pl-add-btn').addEventListener('click', function() {
+      addNewKey(obj, path);
+    });
+    parent.appendChild(addRow);
+  }
+
+  function renderArray(parent, arr, path, parentId) {
+    for (var i = 0; i < arr.length; i++) {
+      var val = arr[i];
+      var valType = inferType(val);
+      var childPath = path.concat(i);
+      var isContainer = valType === 'dict' || valType === 'array';
+      var row = document.createElement('div');
+      row.className = 'pl-row';
+
+      if (isContainer) {
+        var collapseId = parentId + '-arr-' + i;
+        row.innerHTML =
+          '<button class="pl-collapse-btn" data-target="' + collapseId + '">▼</button>' +
+          '<span class="pl-key pl-key--idx">[' + i + ']</span>' +
+          '<span class="pl-type">' + valType + '</span>' +
+          '<span class="pl-val pl-val--container">' + displayLabel(val, valType) + '</span>' +
+          '<button class="pl-del-btn" title="删除">×</button>';
+
+        var childContainer = document.createElement('div');
+        childContainer.className = 'pl-children';
+        childContainer.id = collapseId;
+        if (valType === 'dict') {
+          renderDict(childContainer, val, childPath);
+        } else {
+          renderArray(childContainer, val, childPath, collapseId);
+        }
+
+        row.querySelector('.pl-collapse-btn').addEventListener('click', function() {
+          var c = childContainer;
+          var btn2 = this;
+          if (c.style.display === 'none') {
+            c.style.display = 'block';
+            btn2.textContent = '▼';
+          } else {
+            c.style.display = 'none';
+            btn2.textContent = '▶';
+          }
+        });
+        row.querySelector('.pl-del-btn').addEventListener('click', makeArrayRemove(arr, i));
+
+        parent.appendChild(row);
+        parent.appendChild(childContainer);
+      } else {
+        row.innerHTML =
+          '<span class="pl-key pl-key--idx">[' + i + ']</span>' +
+          '<span class="pl-type">' + valType + '</span>' +
+          buildValueEditor(childPath, val, valType) +
+          '<button class="pl-del-btn" title="删除">×</button>';
+        row.querySelector('.pl-del-btn').addEventListener('click', makeArrayRemove(arr, i));
+        parent.appendChild(row);
+      }
+    }
+
+    // 添加新元素按钮
+    var addRow = document.createElement('div');
+    addRow.className = 'pl-add-row';
+    addRow.innerHTML =
+      '<button class="pl-add-btn">+ 添加元素</button>';
+    addRow.querySelector('.pl-add-btn').addEventListener('click', function() {
+      arr.push('');
+      renderTree();
+    });
+    parent.appendChild(addRow);
+  }
+
+  function buildValueEditor(pathArr, val, type) {
+    var pathJson = JSON.stringify(pathArr).replace(/"/g, '&quot;');
+    if (type === 'boolean') {
+      return '<select class="pl-input" data-path="' + pathJson + '">' +
+        '<option value="true"' + (val ? ' selected' : '') + '>YES</option>' +
+        '<option value="false"' + (val ? '' : ' selected') + '>NO</option>' +
+        '</select>';
+    }
+    if (type === 'integer' || type === 'real') {
+      return '<input class="pl-input pl-input--num" type="text" data-path="' + pathJson + '" value="' + val + '">';
+    }
+    return '<input class="pl-input" type="text" data-path="' + pathJson + '" value="' + escapeXml(val) + '">';
+  }
+
+  function attachInputHandlers() {
+    treeRoot.querySelectorAll('.pl-input').forEach(function(input) {
+      if (input.dataset.bound) return;
+      input.dataset.bound = '1';
+      input.addEventListener('input', function() {
+        updateValue(this);
+      });
+      input.addEventListener('change', function() {
+        updateValue(this);
+      });
+    });
+  }
+
+  function updateValue(input) {
+    var pathArr;
+    try {
+      pathArr = JSON.parse(input.dataset.path);
+    } catch(e) {
+      return;
+    }
+    var obj = plistData;
+    for (var i = 0; i < pathArr.length - 1; i++) {
+      var k = pathArr[i];
+      if (Array.isArray(obj)) {
+        obj = obj[parseInt(k, 10)];
+      } else {
+        obj = obj[k];
+      }
+      if (!obj) return;
+    }
+    var lastKey = pathArr[pathArr.length - 1];
+
+    if (Array.isArray(obj)) {
+      lastKey = parseInt(lastKey, 10);
+    }
+
+    if (input.tagName === 'SELECT') {
+      obj[lastKey] = input.value === 'true';
+    } else {
+      var type = inferType(obj[lastKey]);
+      if (type === 'integer') {
+        obj[lastKey] = parseInt(input.value, 10) || 0;
+      } else if (type === 'real') {
+        obj[lastKey] = parseFloat(input.value) || 0;
+      } else {
+        obj[lastKey] = input.value;
+      }
+    }
+  }
+
+  function makeKeyRename(obj, oldKey) {
+    return function(e) {
+      var newKey = e.target.textContent.trim();
+      if (newKey && newKey !== oldKey) {
+        obj[newKey] = obj[oldKey];
+        delete obj[oldKey];
+        renderTree();
+      } else if (!newKey) {
+        e.target.textContent = oldKey;
+      }
+    };
+  }
+
+  function makeDictRemove(obj, keyToRemove) {
+    return function() {
+      delete obj[keyToRemove];
+      renderTree();
+    };
+  }
+
+  function makeArrayRemove(arr, index) {
+    return function() {
+      arr.splice(index, 1);
+      renderTree();
+    };
+  }
+
+  function addNewKey(obj, path) {
+    var keyName = 'NewKey';
+    var counter = 1;
+    while (obj.hasOwnProperty(keyName)) {
+      keyName = 'NewKey_' + counter;
+      counter++;
+    }
+    obj[keyName] = '';
+    renderTree();
+  }
+
+  function preventNewline(e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      e.target.blur();
+    }
+  }
+
+  // 折叠/展开全部
+  document.getElementById('collapseAllBtn').addEventListener('click', function() {
+    treeRoot.querySelectorAll('.pl-children').forEach(function(c) { c.style.display = 'none'; });
+    treeRoot.querySelectorAll('.pl-collapse-btn').forEach(function(b) { b.textContent = '▶'; });
+  });
+
+  document.getElementById('expandAllBtn').addEventListener('click', function() {
+    treeRoot.querySelectorAll('.pl-children').forEach(function(c) { c.style.display = 'block'; });
+    treeRoot.querySelectorAll('.pl-collapse-btn').forEach(function(b) { b.textContent = '▼'; });
+  });
+
+  // ======================= 文件加载 =======================
+
+  function showError(msg) {
+    errorBox.textContent = msg;
+    errorBox.style.display = 'block';
+    setTimeout(function() {
+      errorBox.style.display = 'none';
+    }, 5000);
+  }
+
+  function loadPlistResult(obj, fileName) {
+    plistData = obj;
+    fileInfo.style.display = 'flex';
+    fileInfo.className = 'pl-file-info pl-file-info--success';
+    fileInfo.innerHTML = '<span class="dd-file-check">✓</span> ' +
+      '<span class="dd-file-name">' + escapeXml(fileName || '未知文件') + '</span>';
+
+    workspace.style.display = 'flex';
+    errorBox.style.display = 'none';
+    renderTree();
+  }
+
+  // 上传
+  uploadZone.addEventListener('click', function() { fileInput.click(); });
+  fileInput.addEventListener('change', function(e) {
+    if (e.target.files.length) loadFile(e.target.files[0]);
+  });
+
+  uploadZone.addEventListener('dragover', function(e) {
+    e.preventDefault();
+    uploadZone.classList.add('cp-upload-zone--active');
+  });
+  uploadZone.addEventListener('dragleave', function() {
+    uploadZone.classList.remove('cp-upload-zone--active');
+  });
+  uploadZone.addEventListener('drop', function(e) {
+    e.preventDefault();
+    uploadZone.classList.remove('cp-upload-zone--active');
+    if (e.dataTransfer.files.length) loadFile(e.dataTransfer.files[0]);
+  });
+
+  function loadFile(file) {
+    loadingBox.style.display = 'block';
+
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      loadingBox.style.display = 'none';
+      var bytes = new Uint8Array(e.target.result);
+
+      // Detect format
+      var header = '';
+      for (var i = 0; i < Math.min(8, bytes.length); i++) {
+        header += String.fromCharCode(bytes[i]);
+      }
+
+      try {
+        var obj;
+        if (header === 'bplist00') {
+          obj = parseBinaryPlist(e.target.result);
+        } else {
+          // Try XML
+          var text = '';
+          for (var i2 = 0; i2 < bytes.length; i2++) {
+            text += String.fromCharCode(bytes[i2]);
+          }
+          // Strip BOM
+          if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
+          obj = parseXmlPlist(text);
+        }
+
+        if (typeof obj !== 'object' || obj === null) {
+          showError('plist 解析结果不是有效的字典或数组');
+          return;
+        }
+        loadPlistResult(obj, file.name);
+      } catch (err) {
+        showError('解析失败: ' + err.message);
+      }
+    };
+    reader.onerror = function() {
+      loadingBox.style.display = 'none';
+      showError('读取文件失败');
+    };
+    reader.readAsArrayBuffer(file);
+  }
+
+  // 粘贴 XML
+  pasteToggle.addEventListener('click', function() {
+    var show = pasteArea.style.display === 'none';
+    pasteArea.style.display = show ? 'block' : 'none';
+    pasteToggle.textContent = show ? '隐藏粘贴区 ▲' : '或粘贴 XML 内容 ▼';
+  });
+
+  parseXmlBtn.addEventListener('click', function() {
+    var xml = plistXml.value.trim();
+    if (!xml) {
+      showError('请粘贴有效的 plist XML 内容');
+      return;
+    }
+    try {
+      var obj = parseXmlPlist(xml);
+      if (typeof obj !== 'object' || obj === null) {
+        showError('解析结果不是有效的字典或数组');
+        return;
+      }
+      loadPlistResult(obj, '手动粘贴');
+      // Hide paste area
+      pasteArea.style.display = 'none';
+      pasteToggle.textContent = '或粘贴 XML 内容 ▼';
+    } catch (err) {
+      showError('解析失败: ' + err.message);
+    }
+  });
+
+  // 重新选择
+  document.getElementById('reuploadBtn').addEventListener('click', function() {
+    workspace.style.display = 'none';
+    fileInfo.style.display = 'none';
+    plistData = null;
+    fileInput.value = '';
+    plistXml.value = '';
+    treeRoot.innerHTML = '';
+    errorBox.style.display = 'none';
+  });
+
+  // 下载
+  downloadBtn.addEventListener('click', function() {
+    if (!plistData) return;
+    var xml = buildPlistXml(plistData);
+    var blob = new Blob([xml], { type: 'application/x-plist' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'output.plist';
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  // 添加根级项（如果 root 是 dict）
+  document.getElementById('addRootBtn').addEventListener('click', function() {
+    if (plistData && typeof plistData === 'object' && !Array.isArray(plistData)) {
+      addNewKey(plistData, []);
+    }
+  });
+
+  // ======================= 初始化：如果没有文件，显示空模板入口 =======================
+})();
+</script>

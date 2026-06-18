@@ -1,5 +1,6 @@
 # robots.txt for 程泽群的博客
 
+# 通用爬虫
 User-agent: *
 Disallow: /_sass/
 Disallow: /_site/
@@ -7,6 +8,20 @@ Disallow: /_posts/
 Disallow: /_layouts/
 Disallow: /_includes/
 Disallow: /.jekyll-cache/
-Disallow: /search.json
+Allow: /llms.txt
+Allow: /llms-full.txt
+
+# AI / LLM 爬虫
+User-agent: GPTBot
+User-agent: ChatGPT-User
+User-agent: Google-Extended
+User-agent: CCBot
+User-agent: anthropic-ai
+User-agent: OAI-SearchBot
+User-agent: PerplexityBot
+User-agent: Applebot-Extended
+Allow: /
+Allow: /llms.txt
+Allow: /llms-full.txt
 
 Sitemap: {{ site.url }}{{ site.baseurl }}/sitemap.xml

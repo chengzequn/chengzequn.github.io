@@ -1,0 +1,62 @@
+---
+layout: null
+permalink: /llms-full.txt
+---
+
+# 程泽群的博客 — 完整内容
+
+> 记录生活与技术的点滴，分享学习心得与经验。
+
+---
+
+## 📄 关于本站
+
+这是程泽群的个人技术博客，旨在分享技术学习心得、项目经验和生活感悟。
+
+- **作者**：程泽群
+- **技术栈**：HTML / CSS / JavaScript / React / Vue / Python / Ruby / Node.js / MySQL / MongoDB / Redis / Git / VS Code / Docker
+- **GitHub**：[chengzequn](https://github.com/chengzequn)
+- **邮箱**：chengzequn@foxmail.com
+- **Twitter**：[@chengzequn](https://twitter.com/chengzequn)
+
+---
+
+## 🛠 在线工具集
+
+{% for tool in site.data.tools %}
+- **{{ tool.name }}**：[{{ site.url }}{{ tool.url }}]({{ site.url }}{{ tool.url }}) — {{ tool.description }}
+{% endfor %}
+
+---
+
+## 📝 博客文章
+
+{% if site.posts.size > 0 %}
+{% for post in site.posts %}
+### {{ post.title }}
+- 日期：{{ post.date | date: "%Y-%m-%d" }}
+- 链接：[{{ post.url | absolute_url }}]({{ post.url | absolute_url }})
+{% if post.categories.size > 0 %}- 分类：{{ post.categories | join: ", " }}{% endif %}
+{% if post.tags.size > 0 %}- 标签：{{ post.tags | join: ", " }}{% endif %}
+
+{{ post.content | strip_html | normalize_whitespace }}
+
+---
+
+{% endfor %}
+{% else %}
+暂无文章。
+{% endif %}
+
+## 📋 页面列表
+
+{% for page in site.pages %}
+{% unless page.url contains '404' or page.url contains '.xml' or page.url contains '.json' or page.url contains 'llms-full' or page.url contains 'assets/' %}
+- **{{ page.title | default: page.name }}**：[{{ page.url | absolute_url }}]({{ page.url | absolute_url }})
+{% endunless %}
+{% endfor %}
+
+---
+
+> 本文件为 AI / LLM 聚合阅读而生成，更新于 {{ site.time | date: "%Y-%m-%d %H:%M" }}。
+> 完整站点地图：[sitemap.xml]({{ site.url }}/sitemap.xml)

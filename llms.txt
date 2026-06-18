@@ -1,0 +1,40 @@
+# 程泽群的博客
+
+> 记录生活与技术的点滴，分享学习心得与经验。
+
+## 关于本站
+这是程泽群的个人技术博客，主要分享前端开发、后端开发、数据库、开发工具等领域的技术文章。
+网站提供实用的在线工具集，包括 SVG 转 PNG、图片颜色拾取、图片颜色替换、文档比对等工具。
+
+## 主要页面
+
+- [首页](https://chengzequn.github.io/) — 博客首页，最新文章列表
+- [关于我](https://chengzequn.github.io/about/) — 个人简介与技术栈
+- [简历](https://chengzequn.github.io/resume.html) — 个人简历
+- [工具集](https://chengzequn.github.io/tools/) — 在线实用工具集合
+- [文章归档](https://chengzequn.github.io/archives/) — 所有文章归档
+- [分类](https://chengzequn.github.io/categories/) — 文章分类浏览
+- [标签](https://chengzequn.github.io/tags/) — 文章标签浏览
+- [友链](https://chengzequn.github.io/friends.html) — 友情链接
+- [导航](https://chengzequn.github.io/nav.html) — 站点导航
+
+## 在线工具
+
+- [SVG 转 PNG](https://chengzequn.github.io/tools/svg2png/) — SVG 转 PNG 并支持修改颜色
+- [图片颜色拾取器](https://chengzequn.github.io/tools/color-picker/) — 上传图片，点击拾取任意像素颜色
+- [图片颜色更改](https://chengzequn.github.io/tools/color-replace/) — 替换图片中的指定颜色为新颜色
+- [文档比对](https://chengzequn.github.io/tools/doc-diff/) — Word / PDF / 文本文件逐字比对差异
+- [Plist 编辑器](https://chengzequn.github.io/tools/plist-editor/) — 查看、编辑、保存 Info.plist（XML / Binary）
+
+## 联系方式
+
+- GitHub: [chengzequn](https://github.com/chengzequn)
+- Email: chengzequn@foxmail.com
+- Twitter: [@chengzequn](https://twitter.com/chengzequn)
+
+## 更多资源
+
+- [完整内容 (llms-full.txt)](https://chengzequn.github.io/llms-full.txt) — 全站内容的完整 Markdown 导出
+- [RSS 订阅](https://chengzequn.github.io/feed.xml) — 通过 RSS 订阅最新文章
+- [Sitemap](https://chengzequn.github.io/sitemap.xml) — XML 站点地图
+- [搜索](https://chengzequn.github.io/search.json) — JSON 格式的搜索索引
