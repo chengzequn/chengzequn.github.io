@@ -75,6 +75,10 @@ paginate_path: '/page:num/' # 分页路径格式
 # 配置已直接在 _includes/giscus_comments.html 中完成
 # 如需禁用某篇文章的评论，在 front matter 中添加: comments: false
 
+# 百度统计配置
+# 在百度统计 https://tongji.baidu.com 获取你的统计 ID
+baidu_analytics: 3e1ddc0bbc15e76d031c997b0392613e
+
 # Exclude from processing.
 # The following items will not be processed, by default.
 # Any item listed under the `exclude:` key here will be automatically added to

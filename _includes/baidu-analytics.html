@@ -1,0 +1,106 @@
+<script>
+  var _hmt = _hmt || [];
+  (function() {
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?{{ site.baidu_analytics }}";
+    var s = document.getElementsByTagName("script")[0]; 
+    s.parentNode.insertBefore(hm, s);
+  })();
+</script>
+
+<script>
+  // ===== 百度统计事件埋点 =====
+  (function() {
+    var track = function(category, action, label, value) {
+      if (window._hmt) {
+        _hmt.push(['_trackEvent', category, action, label, value]);
+      }
+    };
+
+    // 1. 外链点击埋点
+    document.addEventListener('click', function(e) {
+      var el = e.target.closest('a[href]');
+      if (!el) return;
+      var href = el.getAttribute('href');
+      if (!href || href.startsWith('#') || href.startsWith('/') || href.startsWith('{{ site.url }}')) return;
+      if (href.startsWith('javascript:') || href.startsWith('mailto:')) {
+        track('链接', 'click', href.replace(/^mailto:/, ''), 1);
+        return;
+      }
+      track('外链', 'click', el.textContent.trim().slice(0, 50) || href, 1);
+    }, true);
+
+    // 2. 文章阅读深度埋点（仅文章页）
+    {% if page.layout == 'post' %}
+    (function() {
+      var depths = [25, 50, 75, 100];
+      var fired = {};
+      window.addEventListener('scroll', function() {
+        var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        var docHeight = document.documentElement.scrollHeight - window.innerHeight;
+        if (docHeight <= 0) return;
+        var percent = Math.round((scrollTop / docHeight) * 100);
+        depths.forEach(function(d) {
+          if (percent >= d && !fired[d]) {
+            fired[d] = true;
+            track('阅读深度', 'scroll', '{{ page.title | escape }}', d);
+          }
+        });
+      });
+    })();
+    {% endif %}
+
+    // 3. 页面停留时长埋点（>30s, >60s, >180s）
+    var stayFired = {};
+    var staySeconds = [30, 60, 180];
+    staySeconds.forEach(function(s) {
+      setTimeout(function() {
+        if (!stayFired[s]) {
+          stayFired[s] = true;
+          track('停留时长', 'stay', document.title, s);
+        }
+      }, s * 1000);
+    });
+
+    // 4. 复制代码埋点
+    document.addEventListener('copy', function(e) {
+      var selection = window.getSelection().toString().trim();
+      if (selection.length > 10) {
+        var parent = e.target.closest('.highlight, pre, code');
+        if (parent) {
+          track('代码复制', 'copy', selection.slice(0, 50), 1);
+        }
+      }
+    });
+
+    // 5. 主题切换埋点
+    document.addEventListener('click', function(e) {
+      var el = e.target.closest('.theme-toggle, .mobile-theme-toggle');
+      if (el) {
+        track('主题切换', 'toggle', document.documentElement.getAttribute('data-theme') || 'light', 1);
+      }
+    });
+
+    // 6. 搜索埋点
+    document.addEventListener('keydown', function(e) {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        track('搜索', 'shortcut', 'Ctrl+K', 1);
+      }
+    });
+    document.addEventListener('click', function(e) {
+      var el = e.target.closest('.search-button, .search-form, [data-search]');
+      if (el) {
+        track('搜索', 'click', '搜索按钮', 1);
+      }
+    });
+
+    // 7. 分享按钮埋点
+    document.addEventListener('click', function(e) {
+      var el = e.target.closest('.share-button, .share-link, [data-share]');
+      if (el) {
+        var platform = el.getAttribute('data-platform') || el.textContent.trim();
+        track('分享', 'click', platform, 1);
+      }
+    });
+  })();
+</script>
