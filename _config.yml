@@ -70,10 +70,10 @@ show_excerpts: true
 paginate: 10 # 每页显示5篇文章
 paginate_path: '/page:num/' # 分页路径格式
 
-# Disqus评论配置
-# 如需启用评论功能，请取消注释并填写您的Disqus shortname
-# disqus:
-#   shortname: your-disqus-shortname
+# Giscus评论配置
+# 评论系统使用 Giscus (基于 GitHub Discussions)
+# 配置已直接在 _includes/giscus_comments.html 中完成
+# 如需禁用某篇文章的评论，在 front matter 中添加: comments: false
 
 # Exclude from processing.
 # The following items will not be processed, by default.
