@@ -116,6 +116,8 @@ page_paths:
   - tools.html
   - nav.html
   - friends.html
+  - benefits.html
+  - services.html
   - all-posts.md
   - archives/index.html
   - categories/index.html
