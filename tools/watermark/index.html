@@ -1,0 +1,469 @@
+---
+layout: default
+title: 图片加水印
+permalink: /tools/watermark/
+---
+
+<style>
+  /* 加水印工具样式 */
+  .wm-upload-zone {
+    border: 2px dashed #d1d5db;
+    border-radius: 12px;
+    padding: 3rem 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    background: #ffffff;
+  }
+  .wm-upload-zone:hover,
+  .wm-upload-zone--active {
+    border-color: #3b82f6;
+    background: rgba(59, 130, 246, 0.04);
+  }
+  .wm-upload-icon { color: #374151; margin-bottom: 1rem; }
+  .wm-upload-text { font-size: 1rem; color: #0f172a; margin: 0 0 0.25rem; }
+  .wm-upload-hint { font-size: 0.8rem; color: #374151; margin: 0; }
+  .wm-upload-note {
+    margin-top: 0.75rem;
+    font-size: 0.78rem;
+    color: #059669;
+  }
+
+  .wm-workspace { display: flex; flex-direction: column; gap: 1.25rem; }
+  .wm-toolbar { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+
+  .wm-main {
+    display: flex;
+    gap: 1.5rem;
+    align-items: flex-start;
+  }
+
+  /* 预览区 */
+  .wm-preview-panel { flex: 1; min-width: 0; }
+  .wm-canvas-box {
+    position: relative;
+    border: 1px solid #d1d5db;
+    border-radius: 10px;
+    overflow: hidden;
+    background: repeating-conic-gradient(#f1f5f9 0% 25%, transparent 0% 50%) 50% / 16px 16px;
+    display: flex;
+    justify-content: center;
+  }
+  .wm-canvas-box canvas { display: block; max-width: 100%; height: auto; }
+  .wm-hint { margin-top: 0.5rem; font-size: 0.8rem; color: #374151; }
+
+  /* 控制面板 */
+  .wm-controls {
+    width: 300px;
+    flex-shrink: 0;
+    border: 1px solid #d1d5db;
+    border-radius: 10px;
+    padding: 1.25rem;
+    background: #ffffff;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .wm-field { display: flex; flex-direction: column; gap: 0.35rem; }
+  .wm-label { font-size: 0.85rem; color: #374151; }
+  .wm-label b { color: #0f172a; font-weight: 600; }
+
+  .wm-text-input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0.5rem 0.6rem;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    color: #0f172a;
+    background: #ffffff;
+  }
+  .wm-text-input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.08);
+  }
+  .wm-select {
+    width: 100%;
+    padding: 0.4rem 0.5rem;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    color: #0f172a;
+    background: #ffffff;
+  }
+
+  .wm-slider-row {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+  .wm-slider {
+    flex: 1;
+    accent-color: #3b82f6;
+  }
+  .wm-slider-val {
+    width: 3rem;
+    text-align: right;
+    font-size: 0.8rem;
+    color: #374151;
+    font-family: Consolas, Menlo, monospace;
+  }
+
+  .wm-options { display: flex; gap: 1rem; flex-wrap: wrap; }
+  .wm-radio {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.85rem;
+    color: #0f172a;
+    cursor: pointer;
+  }
+  .wm-radio input { accent-color: #3b82f6; }
+
+  .wm-colors { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+  .wm-color-picker { width: 36px; height: 36px; padding: 2px; border: 1px solid #d1d5db; border-radius: 6px; cursor: pointer; background: transparent; }
+  .wm-color-picker::-webkit-color-swatch-wrapper { padding: 0; }
+  .wm-color-picker::-webkit-color-swatch { border-radius: 4px; border: none; }
+  .wm-swatch {
+    width: 28px; height: 28px;
+    border-radius: 6px;
+    border: 2px solid #d1d5db;
+    cursor: pointer;
+    transition: transform 0.15s;
+  }
+  .wm-swatch:hover { transform: scale(1.1); }
+  .wm-swatch--active { border-color: #3b82f6; box-shadow: 0 0 0 2px rgba(59,130,246,.25); }
+
+  .wm-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+  .wm-btn {
+    padding: 0.5rem 1rem;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    background: #ffffff;
+    color: #0f172a;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+  }
+  .wm-btn:hover { border-color: #3b82f6; color: #3b82f6; }
+  .wm-btn--primary {
+    background: #3b82f6;
+    border-color: #3b82f6;
+    color: #ffffff;
+  }
+  .wm-btn--primary:hover { background: #2563eb; color: #ffffff; }
+  .wm-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .wm-btn:disabled:hover { border-color: #d1d5db; color: #0f172a; }
+
+  @media (max-width: 720px) {
+    .wm-main { flex-direction: column; }
+    .wm-controls { width: 100%; }
+  }
+</style>
+
+<article class="page h-entry">
+  <header class="page-header">
+    <a class="tool-back-link" href="{{ '/tools' | relative_url }}">← 返回工具集</a>
+    <h1 class="page-title p-name">图片加水印</h1>
+  </header>
+
+  <div class="tool-container">
+    <!-- 上传区 -->
+    <div class="wm-upload-zone" id="uploadZone">
+      <div class="wm-upload-icon">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="17 8 12 3 7 8"/>
+          <line x1="12" y1="3" x2="12" y2="15"/>
+        </svg>
+      </div>
+      <p class="wm-upload-text">拖拽图片到此处，或点击上传</p>
+      <p class="wm-upload-hint">支持 JPG、PNG、WebP 等格式，适用于身份证、营业执照等证照</p>
+      <p class="wm-upload-note">🔒 图片仅在本地浏览器处理，不会上传到任何服务器</p>
+      <input type="file" id="fileInput" accept="image/*" hidden>
+    </div>
+
+    <!-- 工作区 -->
+    <div class="wm-workspace" id="workspace" style="display:none;">
+      <div class="wm-toolbar">
+        <button class="wm-btn" id="reuploadBtn">← 重新上传</button>
+        <button class="wm-btn wm-btn--primary" id="downloadBtn" disabled>下载水印图片</button>
+      </div>
+
+      <div class="wm-main">
+        <!-- 预览 -->
+        <div class="wm-preview-panel">
+          <div class="wm-canvas-box">
+            <canvas id="canvas"></canvas>
+          </div>
+          <p class="wm-hint">下方调整参数后，水印实时预览；点击「下载水印图片」按原图分辨率导出。</p>
+        </div>
+
+        <!-- 控制面板 -->
+        <div class="wm-controls">
+          <div class="wm-field">
+            <label class="wm-label" for="textInput"><b>水印文字</b></label>
+            <select class="wm-select" id="templateSelect">
+              <option value="">— 选择常用模板 —</option>
+              <option value="本图片仅用于【】办理使用，他用无效">仅用于办理业务</option>
+              <option value="仅用于身份核验，再次复印无效">仅用于身份核验</option>
+              <option value="本证件仅供【】使用">仅供指定用途</option>
+            </select>
+            <input class="wm-text-input" id="textInput" type="text" maxlength="60"
+                   value="本图片仅用于身份核验，他用无效"
+                   placeholder="请输入水印文字，如：仅用于办理…">
+          </div>
+
+          <div class="wm-field">
+            <label class="wm-label"><b>水印样式</b></label>
+            <div class="wm-options">
+              <label class="wm-radio">
+                <input type="radio" name="mode" value="tile" checked> 平铺
+              </label>
+              <label class="wm-radio">
+                <input type="radio" name="mode" value="single"> 居中单条
+              </label>
+            </div>
+          </div>
+
+          <div class="wm-field">
+            <label class="wm-label" for="fontSlider"><b>字号</b>（占图片宽度 %）</label>
+            <div class="wm-slider-row">
+              <input class="wm-slider" id="fontSlider" type="range" min="1" max="20" step="0.5" value="5">
+              <span class="wm-slider-val" id="fontVal">5%</span>
+            </div>
+          </div>
+
+          <div class="wm-field" id="spacingField">
+            <label class="wm-label" for="spacingSlider"><b>平铺文字间距</b></label>
+            <div class="wm-slider-row">
+              <input class="wm-slider" id="spacingSlider" type="range" min="0.5" max="8" step="0.5" value="2">
+              <span class="wm-slider-val" id="spacingVal">2</span>
+            </div>
+          </div>
+
+          <div class="wm-field">
+            <label class="wm-label" for="opacitySlider"><b>透明度</b></label>
+            <div class="wm-slider-row">
+              <input class="wm-slider" id="opacitySlider" type="range" min="5" max="100" value="35">
+              <span class="wm-slider-val" id="opacityVal">35%</span>
+            </div>
+          </div>
+
+          <div class="wm-field">
+            <label class="wm-label" for="angleSlider"><b>倾斜角度</b></label>
+            <div class="wm-slider-row">
+              <input class="wm-slider" id="angleSlider" type="range" min="0" max="90" value="30">
+              <span class="wm-slider-val" id="angleVal">30°</span>
+            </div>
+          </div>
+
+          <div class="wm-field">
+            <label class="wm-label"><b>颜色</b></label>
+            <div class="wm-colors">
+              <input class="wm-color-picker" id="colorPicker" type="color" value="#9ca3af">
+              <span class="wm-swatch wm-swatch--active" data-color="#9ca3af" style="background:#9ca3af;"></span>
+              <span class="wm-swatch" data-color="#ffffff" style="background:#ffffff;"></span>
+              <span class="wm-swatch" data-color="#ef4444" style="background:#ef4444;"></span>
+              <span class="wm-swatch" data-color="#1f2937" style="background:#1f2937;"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</article>
+
+<script>
+(function() {
+  'use strict';
+
+  var uploadZone = document.getElementById('uploadZone');
+  var fileInput = document.getElementById('fileInput');
+  var workspace = document.getElementById('workspace');
+  var canvas = document.getElementById('canvas');
+  var ctx = canvas.getContext('2d');
+  var downloadBtn = document.getElementById('downloadBtn');
+
+  var img = null;
+
+  // 控制项
+  var textInput = document.getElementById('textInput');
+  var templateSelect = document.getElementById('templateSelect');
+  var modeInputs = document.querySelectorAll('input[name="mode"]');
+  var fontSlider = document.getElementById('fontSlider');
+  var fontVal = document.getElementById('fontVal');
+  var spacingField = document.getElementById('spacingField');
+  var spacingSlider = document.getElementById('spacingSlider');
+  var spacingVal = document.getElementById('spacingVal');
+  var opacitySlider = document.getElementById('opacitySlider');
+  var opacityVal = document.getElementById('opacityVal');
+  var angleSlider = document.getElementById('angleSlider');
+  var angleVal = document.getElementById('angleVal');
+  var colorPicker = document.getElementById('colorPicker');
+  var swatches = document.querySelectorAll('.wm-swatch');
+
+  var PREVIEW_MAX_W = 1280;
+
+  // --- 上传 ---
+  uploadZone.addEventListener('click', function() { fileInput.click(); });
+  fileInput.addEventListener('change', function(e) { handleFile(e.target.files[0]); });
+
+  uploadZone.addEventListener('dragover', function(e) {
+    e.preventDefault();
+    uploadZone.classList.add('wm-upload-zone--active');
+  });
+  uploadZone.addEventListener('dragleave', function() {
+    uploadZone.classList.remove('wm-upload-zone--active');
+  });
+  uploadZone.addEventListener('drop', function(e) {
+    e.preventDefault();
+    uploadZone.classList.remove('wm-upload-zone--active');
+    var file = e.dataTransfer.files[0];
+    if (file && file.type && file.type.indexOf('image/') === 0) handleFile(file);
+  });
+
+  document.getElementById('reuploadBtn').addEventListener('click', function() {
+    workspace.style.display = 'none';
+    uploadZone.style.display = 'block';
+    fileInput.value = '';
+    img = null;
+    downloadBtn.disabled = true;
+  });
+
+  function handleFile(file) {
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      var image = new Image();
+      image.onload = function() {
+        img = image;
+        uploadZone.style.display = 'none';
+        workspace.style.display = 'flex';
+        render();
+      };
+      image.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  // --- 控件事件（改动即重绘） ---
+  function bind(input, onInput) {
+    input.addEventListener('input', onInput);
+    input.addEventListener('change', onInput);
+  }
+
+  bind(textInput, render);
+  bind(templateSelect, function() {
+    if (templateSelect.value) {
+      textInput.value = templateSelect.value;
+      templateSelect.selectedIndex = 0;
+    }
+    render();
+  });
+  modeInputs.forEach(function(r) { bind(r, render); });
+  bind(fontSlider, function() { fontVal.textContent = fontSlider.value + '%'; render(); });
+  bind(spacingSlider, function() { spacingVal.textContent = spacingSlider.value; render(); });
+  bind(opacitySlider, function() { opacityVal.textContent = opacitySlider.value + '%'; render(); });
+  bind(angleSlider, function() { angleVal.textContent = angleSlider.value + '°'; render(); });
+  bind(colorPicker, function() {
+    swatches.forEach(function(s) { s.classList.remove('wm-swatch--active'); });
+    render();
+  });
+  swatches.forEach(function(s) {
+    s.addEventListener('click', function() {
+      colorPicker.value = s.dataset.color;
+      swatches.forEach(function(x) { x.classList.remove('wm-swatch--active'); });
+      s.classList.add('wm-swatch--active');
+      render();
+    });
+  });
+
+  function getMode() {
+    for (var i = 0; i < modeInputs.length; i++) {
+      if (modeInputs[i].checked) return modeInputs[i].value;
+    }
+    return 'tile';
+  }
+
+  // --- 渲染 ---
+  function render() {
+    if (!img) return;
+    var srcW = img.naturalWidth;
+    var srcH = img.naturalHeight;
+    var scale = Math.min(1, PREVIEW_MAX_W / srcW);
+    draw(srcW * scale, srcH * scale);
+  }
+
+  function draw(w, h) {
+    canvas.width = Math.round(w);
+    canvas.height = Math.round(h);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+    var text = textInput.value.trim();
+    if (!text) {
+      downloadBtn.disabled = true;
+      return;
+    }
+    downloadBtn.disabled = false;
+
+    var fontSize = Math.max(10, canvas.width * (parseFloat(fontSlider.value) / 100));
+    var angle = parseFloat(angleSlider.value);
+    var opacity = parseFloat(opacitySlider.value) / 100;
+    var color = colorPicker.value;
+    var mode = getMode();
+
+    ctx.save();
+    ctx.globalAlpha = opacity;
+    ctx.fillStyle = color;
+    ctx.font = 'bold ' + fontSize + 'px "PingFang SC", "Microsoft YaHei", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+
+    ctx.translate(canvas.width / 2, canvas.height / 2);
+    ctx.rotate(-angle * Math.PI / 180);
+
+    if (mode === 'tile') {
+      // 按文字实际尺寸排布，避免文字相互重叠
+      var textW = ctx.measureText(text).width;
+      var textH = fontSize;
+      var spacing = parseFloat(spacingSlider.value);
+      var gapX = fontSize * spacing;               // 文字之间的横向间距
+      var gapY = fontSize * spacing * 0.6;         // 纵向间距稍小，更紧凑
+      var stepX = textW + gapX;
+      var stepY = textH + gapY;
+
+      // 旋转后图片在旋转坐标系中的范围（保证四角都盖到）
+      var rad = angle * Math.PI / 180;
+      var cosA = Math.abs(Math.cos(rad));
+      var sinA = Math.abs(Math.sin(rad));
+      var rangeX = (canvas.width * cosA + canvas.height * sinA) / 2 + textW;
+      var rangeY = (canvas.width * sinA + canvas.height * cosA) / 2 + textH;
+
+      for (var x = -rangeX; x <= rangeX; x += stepX) {
+        for (var y = -rangeY; y <= rangeY; y += stepY) {
+          ctx.fillText(text, x, y);
+        }
+      }
+    } else {
+      ctx.fillText(text, 0, 0);
+    }
+
+    ctx.restore();
+  }
+
+  // --- 下载（按原图分辨率导出） ---
+  downloadBtn.addEventListener('click', function() {
+    if (!img) return;
+    draw(img.naturalWidth, img.naturalHeight);
+    var link = document.createElement('a');
+    link.download = 'watermarked.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+    render(); // 恢复预览分辨率
+  });
+})();
+</script>

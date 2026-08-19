@@ -28,6 +28,12 @@
   url: /tools/plist-editor/
   external: false
 
+- name: 图片加水印
+  icon: "💧"
+  description: 为身份证等证照图片添加平铺或单条水印，保护隐私
+  url: /tools/watermark/
+  external: false
+
 
 
 
