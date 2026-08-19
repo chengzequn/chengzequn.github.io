@@ -70,8 +70,8 @@ layout: default
     {% endif %}
   </div>
 
-  {% if site.disqus.shortname %}
-    {% include disqus_comments.html %}
+  {% if page.comments != false %}
+    {% include giscus_comments.html %}
   {% endif %}
 
   <a class="u-url" href="{{ page.url | relative_url }}" hidden></a>

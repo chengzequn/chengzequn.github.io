@@ -36,7 +36,7 @@
           </ul>
         </li>
         <li class="dropdown">
-          <a class="nav-link dropdown-toggle {% if page.url contains "about" or page.url contains "tools" or page.url contains "nav" or page.url contains "friends" %}active{% endif %}" href="#" onclick="return false;">
+          <a class="nav-link dropdown-toggle {% if page.url contains "about" or page.url contains "tools" or page.url contains "nav" or page.url contains "friends" or page.url contains "benefits" or page.url contains "services" %}active{% endif %}" href="#" onclick="return false;">
             我的
             <span class="nav-link-underline"></span>
           </a>
@@ -52,6 +52,12 @@
             </li>
             <li>
               <a class="dropdown-link" href="{{ "/friends" | relative_url }}">友链</a>
+            </li>
+            <li>
+              <a class="dropdown-link" href="{{ "/benefits" | relative_url }}">福利</a>
+            </li>
+            <li>
+              <a class="dropdown-link" href="{{ "/services" | relative_url }}">服务</a>
             </li>
           </ul>
         </li>
@@ -110,6 +116,12 @@
     </li>
     <li>
       <a class="mobile-nav-link {% if page.url contains "friends" %}active{% endif %}" href="{{ "/friends" | relative_url }}">友链</a>
+    </li>
+    <li>
+      <a class="mobile-nav-link {% if page.url contains "benefits" %}active{% endif %}" href="{{ "/benefits" | relative_url }}">福利</a>
+    </li>
+    <li>
+      <a class="mobile-nav-link {% if page.url contains "services" %}active{% endif %}" href="{{ "/services" | relative_url }}">服务</a>
     </li>
   </ul>
   
