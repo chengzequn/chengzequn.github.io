@@ -167,13 +167,24 @@ function createScrollProgressBar() {
   progressContainer.appendChild(progressBar);
   document.body.appendChild(progressContainer);
   
-  // 更新进度条
-  window.addEventListener('scroll', function() {
+  // 更新进度条：passive 监听 + rAF 节流，避免阻塞滚动与频繁重排
+  let ticking = false;
+  const updateProgress = () => {
     const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
     const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-    const scrolled = (winScroll / height) * 100;
+    const scrolled = height > 0 ? (winScroll / height) * 100 : 0;
     progressBar.style.width = scrolled + '%';
-  });
+    ticking = false;
+  };
+
+  window.addEventListener('scroll', function() {
+    if (!ticking) {
+      ticking = true;
+      window.requestAnimationFrame(updateProgress);
+    }
+  }, { passive: true });
+
+  updateProgress();
 }
 
 // 卡片悬停效果增强

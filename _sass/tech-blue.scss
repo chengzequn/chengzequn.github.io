@@ -1,4 +1,5 @@
-@import '_star-animation.scss';
+@use 'sass:color';
+@use 'star-animation';
 
 // 许可证信息样式
 .license-info {
@@ -255,45 +256,6 @@ $shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 
   text-decoration: underline;
 }
 
-// Disqus评论预览样式
-.disqus-preview {
-  background-color: $light-gray;
-  border: 1px solid $border-color;
-  border-radius: $radius-md;
-  padding: $spacing-lg;
-  margin-top: $spacing-lg;
-  text-align: center;
-}
-
-.disqus-message {
-  font-size: $font-size-md;
-  color: $text-secondary;
-  margin-bottom: $spacing-md;
-}
-
-.disqus-instruction {
-  font-size: $font-size-sm;
-  color: $secondary-color;
-  margin-bottom: $spacing-md;
-}
-
-.disqus-config-example {
-  background-color: $white;
-  border: 1px solid $border-color;
-  border-radius: $radius-sm;
-  padding: $spacing-md;
-  margin: 0 auto;
-  max-width: 500px;
-  text-align: left;
-  font-family: $font-mono;
-  font-size: $font-size-xs;
-  color: $text-color;
-  white-space: pre-wrap;
-  overflow-x: auto;
-}
-
-
-
 /* 基础样式 - 科技感背景 */
 * {
   box-sizing: border-box;
@@ -356,7 +318,7 @@ body {
   width: 80px;
   height: 80px;
   border-radius: 50%;
-  background: linear-gradient(135deg, $accent-color, lighten($accent-color, 12%));
+  background: linear-gradient(135deg, $accent-color, color.adjust($accent-color, $lightness: 12%));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -863,7 +825,7 @@ body {
   transition: all 0.3s ease;
 
   &:hover {
-    background: darken($accent-color, 8%);
+    background: color.adjust($accent-color, $lightness: -8%);
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba($accent-color, 0.35);
   }
@@ -1336,7 +1298,7 @@ body {
   flex-shrink: 0;
   width: 10px;
   height: 10px;
-  background: darken($light-gray, 20%);
+  background: color.adjust($light-gray, $lightness: -20%);
   border: 2px solid $accent-color;
   border-radius: 50%;
   z-index: 1;
@@ -4066,10 +4028,7 @@ ul.contact-list {
   .share-button { background-color: #2d3748; color: #e2e8f0; border-color: #4a5568; }
   .share-button:hover { background-color: #63b3ed; color: #fff; border-color: #63b3ed; }
   .post-comments { border-top-color: #4a5568; }
-  .disqus-preview { background-color: #4a5568; border-color: #4a5568; }
-  .disqus-message { color: #cbd5e1; }
-  .disqus-instruction { color: #94a3b8; }
-  .disqus-config-example { background-color: #2d3748; border-color: #4a5568; color: #cbd5e1; }
+
   .post-link { color: #e2e8f0; }
   .post-link:hover { color: #63b3ed; }
   .post-item-meta { color: #94a3b8; }
@@ -4230,10 +4189,7 @@ ul.contact-list {
   .share-button { background-color: #2d3748; color: #e2e8f0; border-color: #4a5568; }
   .share-button:hover { background-color: #63b3ed; color: #fff; border-color: #63b3ed; }
   .post-comments { border-top-color: #4a5568; }
-  .disqus-preview { background-color: #4a5568; border-color: #4a5568; }
-  .disqus-message { color: #cbd5e1; }
-  .disqus-instruction { color: #94a3b8; }
-  .disqus-config-example { background-color: #2d3748; border-color: #4a5568; color: #cbd5e1; }
+
   .post-link { color: #e2e8f0; }
   .post-link:hover { color: #63b3ed; }
   .post-item-meta { color: #94a3b8; }
@@ -5253,7 +5209,7 @@ ul.contact-list {
     color: $white;
 
     &:hover {
-      background: darken($accent-color, 8%);
+      background: color.adjust($accent-color, $lightness: -8%);
       color: $white;
     }
   }
@@ -5649,7 +5605,7 @@ ul.contact-list {
   transition: all 0.2s ease;
 
   &:hover {
-    background: darken(#ff6b35, 8%);
+    background: color.adjust(#ff6b35, $lightness: -8%);
     transform: translateY(-1px);
     color: #fff;
   }
@@ -6285,17 +6241,17 @@ ul.contact-list {
 }
 
 .dd-file-info--loading {
-  background: lighten($accent-color, 38%);
+  background: color.adjust($accent-color, $lightness: 38%);
   color: $accent-color;
 }
 
 .dd-file-info--success {
-  background: lighten(#22c55e, 38%);
+  background: color.adjust(#22c55e, $lightness: 38%);
   color: #166534;
 }
 
 .dd-file-info--error {
-  background: lighten(#ef4444, 32%);
+  background: color.adjust(#ef4444, $lightness: 32%);
   color: #991b1b;
 }
 
@@ -6587,7 +6543,7 @@ ul.contact-list {
   gap: 0.5rem;
 
   &--success {
-    background: lighten(#22c55e, 38%);
+    background: color.adjust(#22c55e, $lightness: 38%);
     color: #166534;
   }
 }
@@ -6637,7 +6593,7 @@ ul.contact-list {
 .pl-error {
   padding: 0.75rem 1rem;
   border-radius: 8px;
-  background: lighten(#ef4444, 32%);
+  background: color.adjust(#ef4444, $lightness: 32%);
   color: #991b1b;
   font-size: 0.85rem;
   margin-bottom: 1rem;

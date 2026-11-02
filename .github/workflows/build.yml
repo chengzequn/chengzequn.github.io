@@ -1,0 +1,71 @@
+name: 构建与检查
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 设置 Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+          bundler-cache: true
+
+      # 使用 production 环境构建，让 seo.html 走线上分支
+      # （开发分支会跳过 jekyll-seo-tag，容易掩盖生产环境才暴露的问题）
+      - name: 构建站点
+        run: bundle exec jekyll build
+        env:
+          JEKYLL_ENV: production
+
+      - name: 校验关键产物
+        run: |
+          set -euo pipefail
+          for f in \
+            index.html sitemap.xml robots.txt feed.xml search.json \
+            llms.txt llms-full.txt \
+            assets/css/main.css \
+            assets/images/logo.png assets/images/default-image.jpg \
+            assets/images/favicon.ico assets/images/apple-touch-icon.png
+          do
+            if [ -f "_site/$f" ]; then
+              echo "OK   $f"
+            else
+              echo "缺失 $f"
+              exit 1
+            fi
+          done
+
+      # 检查 HTML 引用的本地静态资源是否真实存在
+      # （曾出现 _config.yml 声明的 logo/default-image 实际不存在，
+      #   导致全站 og:image 404，而这个分支只在生产环境可见）
+      - name: 检查本地资源死链
+        run: |
+          set -euo pipefail
+          missing=0
+          while IFS= read -r url; do
+            [ -z "$url" ] && continue
+            # 去掉 #fragment（SVG sprite 引用）与 ?query
+            path="${url%%#*}"
+            path="${path%%\?*}"
+            [ -z "$path" ] && continue
+            if [ ! -e "_site$path" ]; then
+              echo "死链 $url"
+              missing=1
+            fi
+          done < <(grep -rhoE '(href|src)="/assets/[^"]*"' _site --include='*.html' \
+                   | sed -E 's/.*="([^"]*)".*/\1/' | sort -u)
+          if [ "$missing" -eq 0 ]; then
+            echo "本地资源引用全部有效"
+          fi
+          exit "$missing"

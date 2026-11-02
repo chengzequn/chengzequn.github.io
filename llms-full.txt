@@ -24,7 +24,7 @@ permalink: /llms-full.txt
 ## 🛠 在线工具集
 
 {% for tool in site.data.tools %}
-- **{{ tool.name }}**：[{{ site.url }}{{ tool.url }}]({{ site.url }}{{ tool.url }}) — {{ tool.description }}
+- **{{ tool.name }}**：[{{ tool.url | absolute_url }}]({{ tool.url | absolute_url }}) — {{ tool.description }}
 {% endfor %}
 
 ---
@@ -51,7 +51,7 @@ permalink: /llms-full.txt
 ## 📋 页面列表
 
 {% for page in site.pages %}
-{% unless page.url contains '404' or page.url contains '.xml' or page.url contains '.json' or page.url contains 'llms-full' or page.url contains 'assets/' %}
+{% unless page.url contains '404' or page.url contains '.xml' or page.url contains '.json' or page.url contains 'llms' or page.url contains 'assets/' %}
 - **{{ page.title | default: page.name }}**：[{{ page.url | absolute_url }}]({{ page.url | absolute_url }})
 {% endunless %}
 {% endfor %}
@@ -59,4 +59,4 @@ permalink: /llms-full.txt
 ---
 
 > 本文件为 AI / LLM 聚合阅读而生成，更新于 {{ site.time | date: "%Y-%m-%d %H:%M" }}。
-> 完整站点地图：[sitemap.xml]({{ site.url }}/sitemap.xml)
+> 完整站点地图：[sitemap.xml]({{ "/sitemap.xml" | absolute_url }})

@@ -28,12 +28,6 @@
             {% include word_count.html %}
           </section>
           
-        {% when 'page_views' %}
-          <!-- 热度排行 -->
-          <section class="sidebar-section">
-            <h3 class="sidebar-title">热门文章</h3>
-            {% include page_views.html %}
-          </section>
           
         {% when 'wechat_official' %}
           <!-- 微信公众号 -->
@@ -157,12 +151,6 @@
     <section class="sidebar-section">
       <h3 class="sidebar-title">文章统计</h3>
       {% include word_count.html %}
-    </section>
-
-    <!-- 热度排行 -->
-    <section class="sidebar-section">
-      <h3 class="sidebar-title">热门文章</h3>
-      {% include page_views.html %}
     </section>
 
     <!-- 微信公众号 -->

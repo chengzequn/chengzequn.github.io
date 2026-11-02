@@ -5,6 +5,14 @@
   <link rel="stylesheet" href="{{ "/assets/css/main.css" | relative_url }}">
   <link rel="stylesheet" href="{{ "/assets/css/license.css" | relative_url }}">
   
+  <!-- 站点图标 -->
+  <link rel="icon" href="{{ "/assets/images/favicon.ico" | relative_url }}" sizes="any"/>
+  <link rel="icon" type="image/png" sizes="180x180" href="{{ "/assets/images/apple-touch-icon.png" | relative_url }}"/>
+  <link rel="apple-touch-icon" href="{{ "/assets/images/apple-touch-icon.png" | relative_url }}"/>
+
+  <!-- 首屏大图预加载 -->
+  <link rel="preload" as="image" href="{{ "/assets/images/hero_bg.webp" | relative_url }}" type="image/webp" fetchpriority="high"/>
+
   <!-- 资源预连接 -->
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   
@@ -12,7 +20,7 @@
   {% include seo.html %}
   
   <!-- 其他链接 -->
-  <link rel="canonical" href="{{ page.url | replace:'index.html','' | absolute_url }}">
+  {% comment %}canonical 由 jekyll-seo-tag 输出，此处不再重复{% endcomment %}
   <link rel="alternate" type="application/rss+xml" title="{{ site.title | escape }}" href="{{ "/feed.xml" | relative_url }}">
   <link rel="alternate" hreflang="{{ site.lang | default: 'zh-CN' }}" href="{{ page.url | replace:'index.html','' | absolute_url }}">
   <link rel="alternate" hreflang="x-default" href="{{ page.url | replace:'index.html','' | absolute_url }}">
@@ -24,9 +32,6 @@
 
 
   <!-- 分析工具 -->
-  {% if jekyll.environment == 'production' and site.google_analytics %}
-    {% include google-analytics.html %}
-  {% endif %}
   {% if jekyll.environment == 'production' and site.baidu_analytics %}
     {% include baidu-analytics.html %}
   {% endif %}

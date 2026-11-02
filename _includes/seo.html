@@ -1,164 +1,24 @@
 {% comment %}
-SEO模块 - 用于优化网站在搜索引擎和社交媒体中的展示
-基于jekyll-seo-tag插件实现
+SEO 模块。
+
+元标签（title / description / canonical / og:* / twitter:*）与结构化数据（JSON-LD）
+统一由 jekyll-seo-tag 插件生成，避免手写标签与插件输出重复或冲突。
+默认分享图通过 _config.yml 的 defaults.image 注入，页面可用 front matter 的 image 覆盖。
+
+本文件仅补充插件不负责的 robots 指令。
 {% endcomment %}
 
 {% if jekyll.environment == 'production' %}
-  {% comment %}生产环境下的SEO配置{% endcomment %}
-  
-  <!-- jekyll-seo-tag 插件生成的SEO元标签 -->
   {% seo %}
-  
-  <!-- 自定义SEO元标签 -->
-  {% if page.seo_title %}
-    <meta property="og:title" content="{{ page.seo_title }}">
-    <meta name="twitter:title" content="{{ page.seo_title }}">
-  {% endif %}
-  
-  {% if page.seo_description %}
-    <meta name="description" content="{{ page.seo_description }}">
-    <meta property="og:description" content="{{ page.seo_description }}">
-    <meta name="twitter:description" content="{{ page.seo_description }}">
-  {% endif %}
-  
-  {% if page.image %}
-    <meta property="og:image" content="{{ page.image | absolute_url }}">
-    <meta name="twitter:image" content="{{ page.image | absolute_url }}">
-    <meta name="twitter:card" content="summary_large_image">
-  {% elsif site.default_image %}
-    <meta property="og:image" content="{{ site.default_image | absolute_url }}">
-    <meta name="twitter:image" content="{{ site.default_image | absolute_url }}">
-    <meta name="twitter:card" content="summary_large_image">
-  {% elsif site.logo %}
-    <meta property="og:image" content="{{ site.logo | absolute_url }}">
-    <meta name="twitter:image" content="{{ site.logo | absolute_url }}">
-    <meta name="twitter:card" content="summary">
-  {% endif %}
-  
-  {% if page.author %}
-    <meta name="author" content="{{ page.author }}">
-    <meta property="og:author" content="{{ page.author }}">
-  {% elsif site.author %}
-    <meta name="author" content="{{ site.author }}">
-    <meta property="og:author" content="{{ site.author }}">
-  {% endif %}
-  
-  {% if page.keywords %}
-    <meta name="keywords" content="{{ page.keywords | join: ', ' }}">
-  {% endif %}
-  
-  <!-- 网站结构数据 -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    {% if page.layout == 'post' %}
-    "@type": "BlogPosting",
-    "@id": "{{ page.url | absolute_url }}#article",
-    "headline": "{{ page.title | default: site.title | escape }}",
-    "description": "{{ page.excerpt | default: page.seo_description | default: site.description | strip_html | normalize_whitespace | truncate: 160 }}",
-    "url": "{{ page.url | absolute_url }}",
-    "mainEntityOfPage": {
-      "@type": "WebPage",
-      "@id": "{{ page.url | absolute_url }}#webpage"
-    },
-    {% if site.author %}
-    "author": {
-      "@type": "Person",
-      "name": "{{ site.author }}",
-      "url": "{{ site.url }}",
-      "sameAs": [
-        "https://github.com/{{ site.github_username }}"
-        {% if site.twitter_username %}, "https://twitter.com/{{ site.twitter_username }}"{% endif %}
-      ]
-    },
-    {% endif %}
-    "datePublished": "{{ page.date | date_to_xmlschema }}",
-    {% if page.last_modified_at %}
-    "dateModified": "{{ page.last_modified_at | date_to_xmlschema }}",
-    {% elsif page.date %}
-    "dateModified": "{{ page.date | date_to_xmlschema }}",
-    {% endif %}
-    {% if page.image %}
-    "image": "{{ page.image | absolute_url }}",
-    {% elsif site.default_image %}
-    "image": "{{ site.default_image | absolute_url }}",
-    {% elsif site.logo %}
-    "image": "{{ site.logo | absolute_url }}",
-    {% endif %}
-    {% if page.categories %}
-    "keywords": "{{ page.categories | join: ', ' }}, {{ page.tags | join: ', ' }}",
-    "articleSection": "{{ page.categories | first }}",
-    {% endif %}
-    "wordCount": "{{ content | number_of_words }}",
-    "inLanguage": "{{ site.lang | default: 'zh-CN' }}",
-    "isAccessibleForFree": true,
-    "publisher": {
-      "@type": "Organization",
-      "name": "{{ site.title }}",
-      "logo": {
-        "@type": "ImageObject",
-        "url": "{{ site.logo | default: '/assets/images/logo.png' | absolute_url }}"
-      }
-    }
-    {% else %}
-    "@type": "{% if page.layout == 'page' %}WebPage{% elsif page.layout == 'home' %}Blog{% else %}Website{% endif %}",
-    "@id": "{{ page.url | absolute_url }}#webpage",
-    "headline": "{{ page.title | default: site.title | escape }}",
-    "description": "{{ page.excerpt | default: site.description | strip_html | normalize_whitespace | truncate: 160 }}",
-    "url": "{{ page.url | absolute_url }}",
-    {% if site.author %}
-    "author": {
-      "@type": "Person",
-      "name": "{{ site.author }}",
-      "url": "{{ site.url }}",
-      "sameAs": [
-        "https://github.com/{{ site.github_username }}"
-        {% if site.twitter_username %}, "https://twitter.com/{{ site.twitter_username }}"{% endif %}
-      ]
-    },
-    {% endif %}
-    "datePublished": "{{ page.date | default: site.time | date: '%Y-%m-%d' }}",
-    {% if page.modified_date %}
-    "dateModified": "{{ page.modified_date }}",
-    {% endif %}
-    {% if page.image %}
-    "image": "{{ page.image | absolute_url }}",
-    {% elsif site.default_image %}
-    "image": "{{ site.default_image | absolute_url }}",
-    {% elsif site.logo %}
-    "image": "{{ site.logo | absolute_url }}",
-    {% endif %}
-    {% if page.categories %}
-    "keywords": "{{ page.categories | join: ', ' }}",
-    {% endif %}
-    "inLanguage": "{{ site.lang | default: 'zh-CN' }}",
-    "publisher": {
-      "@type": "Organization",
-      "name": "{{ site.title }}",
-      "logo": {
-        "@type": "ImageObject",
-        "url": "{{ site.logo | default: '/assets/images/logo.png' | absolute_url }}"
-      }
-    }
-    {% endif %}
-  }
-  </script>
-  
-  <!-- 机器人指令 -->
+
   {% if page.noindex %}
     <meta name="robots" content="noindex, nofollow">
   {% else %}
     <meta name="robots" content="index, follow">
   {% endif %}
-
 {% else %}
-  {% comment %}开发环境下的SEO配置 - 简化版{% endcomment %}
-  
-  <!-- 基本元标签 -->
+  {% comment %}开发环境：不启用插件，仅输出基本标签并禁止索引{% endcomment %}
   <title>{% if page.title %}{{ page.title | escape }} - {{ site.title | escape }}{% else %}{{ site.title | escape }}{% endif %}</title>
   <meta name="description" content="{{ page.excerpt | default: site.description | strip_html | normalize_whitespace | truncate: 160 }}">
-  
-  <!-- 开发环境提示 -->
   <meta name="robots" content="noindex, nofollow">
-  
 {% endif %}

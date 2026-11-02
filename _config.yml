@@ -23,7 +23,7 @@ email: chengzequn@foxmail.com
 description: >- # this means to ignore newlines until "baseurl:"  
   记录生活与技术的点滴，分享学习心得与经验。
 baseurl: "" # the subpath of your site, e.g. /blog
-url: "https://chengzequn.github.io" # the base hostname & protocol for your site
+url: "https://chengzequn.cn" # the base hostname & protocol for your site
 lang: zh-CN
 twitter_username: chengzequn
 github_username:  chengzequn
@@ -65,6 +65,14 @@ social:
 
 # 控制摘要显示
 show_excerpts: true
+
+# 默认分享图：注入 page.image，让 jekyll-seo-tag 自动输出 og:image / twitter:card
+# 各页面或文章可在 front matter 中用 image 覆盖
+defaults:
+  - scope:
+      path: ""
+    values:
+      image: /assets/images/default-image.jpg
 
 # 分页设置
 paginate: 10 # 每页显示5篇文章
@@ -108,7 +116,6 @@ sidebar:
   - about
   - announcement
   - word_count
-  - page_views
   - wechat_official
 
 # 导航页面路径
@@ -125,3 +132,4 @@ page_paths:
   - all-posts.md
   - archives/index.html
   - categories/index.html
+  - tags/index.html
