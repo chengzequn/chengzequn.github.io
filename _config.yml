@@ -109,12 +109,6 @@ baidu_analytics: 3e1ddc0bbc15e76d031c997b0392613e
 
 exclude: []
 
-# 让 Jekyll 把 _headers 复制到 _site（默认会忽略下划线开头的文件）
-# GitHub Pages 用 _headers 设置 HTTP 响应头（如 Permissions-Policy）
-include:
-  - .htaccess
-  - _headers
-
 # 侧边栏模块配置
 # 控制侧边栏各模块的显示与顺序
 # 列表中存在的模块名表示开启该模块，顺序即为显示顺序
