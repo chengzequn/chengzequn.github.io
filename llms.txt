@@ -1,56 +1,40 @@
----
-layout: null
-permalink: /llms.txt
----
-# {{ site.title }}
+# 程泽群的博客
 
-> {{ site.description }}
+> 记录生活与技术的点滴，分享学习心得与经验。
 
 ## 关于本站
-
-这是{{ site.author }}的个人技术博客，主要分享{% if site.categories.size > 0 %}{% for category in site.categories %}{{ category[0] }}{% unless forloop.last %}、{% endunless %}{% endfor %}{% else %}技术{% endif %}等领域的技术文章。
-{% if site.data.tools.size > 0 %}网站提供 {{ site.data.tools.size }} 个在线工具，包括{% for tool in site.data.tools %}{{ tool.name }}{% unless forloop.last %}、{% endunless %}{% endfor %}。{% endif %}
+这是程泽群的个人技术博客，主要分享前端开发、后端开发、数据库、开发工具等领域的技术文章。
+网站提供实用的在线工具集，包括 SVG 转 PNG、图片颜色拾取、图片颜色替换、文档比对等工具。
 
 ## 主要页面
 
-{% comment %}按 _config.yml 中 page_paths 的顺序输出，新增导航页会自动同步{% endcomment %}
-{% for src in site.page_paths %}{% for p in site.pages %}{% if p.path == src %}- [{{ p.title }}]({{ p.url | absolute_url }}){% if p.description %} — {{ p.description }}{% endif %}
-{% endif %}{% endfor %}{% endfor %}
+- [首页](https://chengzequn.github.io/) — 博客首页，最新文章列表
+- [关于我](https://chengzequn.github.io/about/) — 个人简介与技术栈
+- [简历](https://chengzequn.github.io/resume.html) — 个人简历
+- [工具集](https://chengzequn.github.io/tools/) — 在线实用工具集合
+- [文章归档](https://chengzequn.github.io/archives/) — 所有文章归档
+- [分类](https://chengzequn.github.io/categories/) — 文章分类浏览
+- [标签](https://chengzequn.github.io/tags/) — 文章标签浏览
+- [友链](https://chengzequn.github.io/friends.html) — 友情链接
+- [导航](https://chengzequn.github.io/nav.html) — 站点导航
 
 ## 在线工具
 
-{% for tool in site.data.tools %}- [{{ tool.name }}]({{ tool.url | absolute_url }}) — {{ tool.description }}
-{% endfor %}
-
-## 全部文章
-
-{% for post in site.posts %}- [{{ post.title }}]({{ post.url | absolute_url }}) — {{ post.date | date: "%Y-%m-%d" }}{% if post.categories.size > 0 %} · {{ post.categories | join: " / " }}{% endif %}{% assign desc = post.description | default: post.excerpt | strip_html | normalize_whitespace | truncate: 100 %}{% if desc != empty %} — {{ desc }}{% endif %}
-{% endfor %}
-
-## 分类
-
-{% for category in site.categories %}- [{{ category[0] }}]({{ "/categories/" | absolute_url }}#{{ category[0] | slugify }}) — {{ category[1].size }} 篇
-{% endfor %}
-
-## 标签
-
-{% for tag in site.tags %}- [{{ tag[0] }}]({{ "/tags/" | absolute_url }}#{{ tag[0] | slugify }}) — {{ tag[1].size }} 篇
-{% endfor %}
+- [SVG 转 PNG](https://chengzequn.github.io/tools/svg2png/) — SVG 转 PNG 并支持修改颜色
+- [图片颜色拾取器](https://chengzequn.github.io/tools/color-picker/) — 上传图片，点击拾取任意像素颜色
+- [图片颜色更改](https://chengzequn.github.io/tools/color-replace/) — 替换图片中的指定颜色为新颜色
+- [文档比对](https://chengzequn.github.io/tools/doc-diff/) — Word / PDF / 文本文件逐字比对差异
+- [Plist 编辑器](https://chengzequn.github.io/tools/plist-editor/) — 查看、编辑、保存 Info.plist（XML / Binary）
 
 ## 联系方式
 
-- GitHub: [{{ site.github_username }}](https://github.com/{{ site.github_username }})
-- Email: {{ site.email }}
-{% if site.twitter_username %}- Twitter: [@{{ site.twitter_username }}](https://twitter.com/{{ site.twitter_username }})
-{% endif %}
+- GitHub: [chengzequn](https://github.com/chengzequn)
+- Email: chengzequn@foxmail.com
+- Twitter: [@chengzequn](https://twitter.com/chengzequn)
 
 ## 更多资源
 
-- [完整内容 (llms-full.txt)]({{ "/llms-full.txt" | absolute_url }}) — 全站内容的完整 Markdown 导出
-- [RSS 订阅]({{ "/feed.xml" | absolute_url }}) — 通过 RSS 订阅最新文章
-- [Sitemap]({{ "/sitemap.xml" | absolute_url }}) — XML 站点地图
-- [搜索索引]({{ "/search.json" | absolute_url }}) — JSON 格式的搜索索引
-
----
-
-> 本文件由 Jekyll 自动生成，请勿手动编辑。更新于 {{ site.time | date: "%Y-%m-%d %H:%M" }}。
+- [完整内容 (llms-full.txt)](https://chengzequn.github.io/llms-full.txt) — 全站内容的完整 Markdown 导出
+- [RSS 订阅](https://chengzequn.github.io/feed.xml) — 通过 RSS 订阅最新文章
+- [Sitemap](https://chengzequn.github.io/sitemap.xml) — XML 站点地图
+- [搜索](https://chengzequn.github.io/search.json) — JSON 格式的搜索索引

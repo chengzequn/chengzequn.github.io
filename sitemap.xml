@@ -1,0 +1,71 @@
+---
+---
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+  
+  <!-- 首页 -->
+  <url>
+    <loc>{{ site.url }}{{ site.baseurl }}/</loc>
+    <lastmod>{{ site.time | date: "%Y-%m-%d" }}</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+  
+  <!-- 所有页面 -->
+  {% for page in site.pages %}
+    {% unless page.url contains '404' or page.url contains '.xml' %}
+      <url>
+        <loc>{{ site.url }}{{ site.baseurl }}{{ page.url | replace:'index.html','' }}</loc>
+        {% if page.last_modified_at %}
+          <lastmod>{{ page.last_modified_at | date: "%Y-%m-%d" }}</lastmod>
+        {% else %}
+          <lastmod>{{ site.time | date: "%Y-%m-%d" }}</lastmod>
+        {% endif %}
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+      </url>
+    {% endunless %}
+  {% endfor %}
+  
+  <!-- 所有文章 -->
+  {% for post in site.posts %}
+    <url>
+      <loc>{{ site.url }}{{ site.baseurl }}{{ post.url | replace:'index.html','' }}</loc>
+      {% if post.last_modified_at %}
+        <lastmod>{{ post.last_modified_at | date: "%Y-%m-%d" }}</lastmod>
+      {% else %}
+        <lastmod>{{ post.date | date: "%Y-%m-%d" }}</lastmod>
+      {% endif %}
+      <changefreq>monthly</changefreq>
+      <priority>0.9</priority>
+    </url>
+  {% endfor %}
+  
+  <!-- 所有分类页面 -->
+  {% if site.categories.size > 0 %}
+    {% for category in site.categories %}
+      {% assign category_name = category | first %}
+      {% assign category_slug = category_name | slugify %}
+      <url>
+        <loc>{{ site.url }}{{ site.baseurl }}/categories/#{{ category_slug }}</loc>
+        <lastmod>{{ site.time | date: "%Y-%m-%d" }}</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.7</priority>
+      </url>
+    {% endfor %}
+  {% endif %}
+  
+  <!-- 所有标签页面 -->
+  {% if site.tags.size > 0 %}
+    {% for tag in site.tags %}
+      {% assign tag_name = tag | first %}
+      {% assign tag_slug = tag_name | slugify %}
+      <url>
+        <loc>{{ site.url }}{{ site.baseurl }}/tags/#{{ tag_slug }}</loc>
+        <lastmod>{{ site.time | date: "%Y-%m-%d" }}</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.6</priority>
+      </url>
+    {% endfor %}
+  {% endif %}
+</urlset>

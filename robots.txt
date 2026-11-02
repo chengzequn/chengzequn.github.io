@@ -28,4 +28,4 @@ Allow: /
 Allow: /llms.txt
 Allow: /llms-full.txt
 
-Sitemap: {{ "/sitemap.xml" | absolute_url }}
+Sitemap: {{ site.url }}{{ site.baseurl }}/sitemap.xml
