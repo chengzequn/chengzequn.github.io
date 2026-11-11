@@ -26,7 +26,7 @@ baseurl: "" # the subpath of your site, e.g. /blog
 url: "https://chengzequn.github.io" # the base hostname & protocol for your site
 lang: zh-CN
 twitter_username: chengzequn
-github_username:  chengzequn
+github_username: chengzequn
 
 # Build settings
 # 不使用外部主题，使用我们自定义的主题
@@ -41,6 +41,11 @@ plugins:
   - jekyll-seo-tag
   - jekyll-sitemap
   - jekyll-paginate
+  - jekyll-minifier
+
+# 压缩 HTML / CSS / XML（关闭 JS 压缩，避免构建机缺少 JS 运行时导致失败）
+jekyll-minifier:
+  minify_js: false
 
 # 自定义主题设置
 author: 程泽群
@@ -54,7 +59,7 @@ social_links:
 license: CC BY-NC-SA 4.0
 license_url: https://creativecommons.org/licenses/by-nc-sa/4.0/
 license_description: 知识共享署名-非商业性使用-相同方式共享 4.0 国际许可协议
-default_image: "/assets/images/default-image.jpg" # 默认分享图片
+default_image: "/assets/images/default-image.png" # 默认分享图片
 logo: "/assets/images/logo.png" # 网站logo
 
 social:
@@ -67,7 +72,7 @@ social:
 show_excerpts: true
 
 # 分页设置
-paginate: 10 # 每页显示5篇文章
+paginate: 10 # 每页显示10篇文章
 paginate_path: '/page:num/' # 分页路径格式
 
 # Giscus评论配置
@@ -125,3 +130,7 @@ page_paths:
   - all-posts.md
   - archives/index.html
   - categories/index.html
+
+# CSS压缩
+sass:
+  style: compressed
