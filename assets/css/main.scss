@@ -2,5 +2,5 @@
 ---
 
 // 导入科技蓝主题样式
-@import "tech-blue.scss";
-@import "syntax.scss";
+@use "tech-blue";
+@use "syntax";
