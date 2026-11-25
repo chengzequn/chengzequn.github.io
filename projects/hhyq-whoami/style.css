@@ -23,6 +23,7 @@ button { border: none; background: none; cursor: pointer; font-family: inherit; 
 .app {
     position: relative; z-index: 1;
     width: 100%; height: 100%;
+    height: 100dvh;
     overflow: hidden;
 }
 .page {
@@ -46,6 +47,8 @@ button { border: none; background: none; cursor: pointer; font-family: inherit; 
     background: linear-gradient(180deg, #ffe8cc 0%, #f8c0c0 35%, #b0c4e8 70%, #8ab4d8 100%);
     justify-content: flex-start;
     text-align: center;
+    padding: clamp(12px, 3dvh, 32px) 24px;
+    padding-bottom: max(clamp(12px, 3dvh, 32px), env(safe-area-inset-bottom));
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
@@ -59,14 +62,14 @@ button { border: none; background: none; cursor: pointer; font-family: inherit; 
 
 .show-tag {
     display: inline-block;
-    padding: 6px 18px;
+    padding: clamp(4px, 0.9dvh, 6px) clamp(14px, 2.8dvh, 18px);
     background: rgba(255,255,255,0.85);
     border-radius: 20px;
-    font-size: 12px;
+    font-size: clamp(10px, 1.8dvh, 12px);
     color: #e85878;
     letter-spacing: 3px;
     font-weight: 600;
-    margin-bottom: 28px;
+    margin-bottom: clamp(10px, 3.6dvh, 28px);
     box-shadow: 0 4px 15px rgba(232,88,120,0.15);
     backdrop-filter: blur(10px);
 }
@@ -82,8 +85,9 @@ button { border: none; background: none; cursor: pointer; font-family: inherit; 
 }
 
 .poster {
-    width: 240px; height: 340px;
-    margin: 0 auto 36px;
+    width: clamp(130px, 30dvh, 240px);
+    height: clamp(190px, 42.4dvh, 340px);
+    margin: 0 auto clamp(12px, 5dvh, 36px);
     border-radius: 16px;
     background: linear-gradient(160deg, #fff5e8 0%, #ffe0e8 40%, #e0e8f8 100%);
     box-shadow: 0 20px 50px rgba(200,120,140,0.25), 0 0 40px rgba(120,160,220,0.15);
@@ -105,52 +109,53 @@ button { border: none; background: none; cursor: pointer; font-family: inherit; 
     background: radial-gradient(circle, rgba(150,180,240,0.4), transparent 70%);
     border-radius: 50%;
 }
-.poster-inner { position: relative; z-index: 2; padding: 20px; }
+.poster-inner { position: relative; z-index: 2; padding: clamp(8px, 2.2dvh, 20px); }
 .title-main {
-    font-size: 52px; font-weight: 800;
-    letter-spacing: 10px; line-height: 1.1;
+    font-size: clamp(22px, 4.6dvh, 40px); font-weight: 800;
+    letter-spacing: clamp(2px, 0.8dvh, 8px); line-height: 1.1;
+    white-space: nowrap;
     background: linear-gradient(135deg, #e85878 0%, #c04868 50%, #a85078 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    margin-bottom: 14px;
+    margin-bottom: clamp(6px, 1.8dvh, 14px);
 }
 .title-sub {
-    font-size: 12px;
-    letter-spacing: 6px;
+    font-size: clamp(9px, 1.4dvh, 12px);
+    letter-spacing: clamp(3px, 0.8dvh, 6px);
     color: rgba(200,80,100,0.6);
     font-weight: 500;
 }
 .poster-divider {
     width: 50px; height: 2px;
     background: linear-gradient(90deg, transparent, rgba(232,88,120,0.4), transparent);
-    margin: 20px auto;
+    margin: clamp(10px, 2.6dvh, 20px) auto;
     border-radius: 2px;
 }
 .tagline {
-    font-size: 14px;
+    font-size: clamp(11px, 1.8dvh, 14px);
     color: rgba(100,60,80,0.65);
     letter-spacing: 2px;
     font-style: italic;
 }
 
-.intro-text { margin-bottom: 36px; }
+.intro-text { margin-bottom: clamp(12px, 4.5dvh, 36px); }
 .intro-text p {
-    font-size: 16px;
+    font-size: clamp(12px, 2dvh, 16px);
     color: rgba(80,60,80,0.75);
-    line-height: 1.9;
+    line-height: 1.8;
     font-weight: 400;
 }
 .intro-text .highlight {
     color: #e85878;
-    font-size: 20px;
+    font-size: clamp(15px, 2.6dvh, 20px);
     font-weight: 600;
-    margin-top: 12px;
+    margin-top: clamp(4px, 1.5dvh, 12px);
 }
 
 .btn-start {
     position: relative;
-    padding: 16px 60px;
-    font-size: 17px;
+    padding: clamp(10px, 2dvh, 16px) clamp(40px, 7dvh, 60px);
+    font-size: clamp(14px, 2.1dvh, 17px);
     font-weight: 600;
     letter-spacing: 4px;
     color: #fff;
@@ -173,44 +178,10 @@ button { border: none; background: none; cursor: pointer; font-family: inherit; 
     100% { transform: scale(1.3); opacity: 0; }
 }
 .footer-tip {
-    margin-top: 18px;
-    font-size: 12px;
+    margin-top: clamp(8px, 2.2dvh, 18px);
+    font-size: clamp(10px, 1.5dvh, 12px);
     color: rgba(80,60,80,0.4);
     letter-spacing: 1px;
-}
-
-/* 矮屏自适应：压缩布局，保证底部按钮完整可见 */
-@media (max-height: 780px) {
-    .page.page-start { padding: 20px 24px; }
-    .show-tag { margin-bottom: 16px; }
-    .poster {
-        width: 200px; height: 270px;
-        margin-bottom: 22px;
-    }
-    .title-main { font-size: 42px; letter-spacing: 8px; margin-bottom: 10px; }
-    .poster-divider { margin: 14px auto; }
-    .intro-text { margin-bottom: 22px; }
-    .intro-text p { font-size: 14px; line-height: 1.75; }
-    .intro-text .highlight { font-size: 17px; margin-top: 6px; }
-    .btn-start { padding: 14px 54px; font-size: 16px; }
-    .footer-tip { margin-top: 12px; }
-}
-
-@media (max-height: 600px) {
-    .page.page-start { padding: 14px 20px; }
-    .show-tag { margin-bottom: 10px; }
-    .poster {
-        width: 150px; height: 205px;
-        margin-bottom: 14px;
-    }
-    .title-main { font-size: 30px; letter-spacing: 6px; }
-    .title-sub { font-size: 10px; letter-spacing: 4px; }
-    .poster-divider { margin: 10px auto; }
-    .intro-text { margin-bottom: 14px; }
-    .intro-text p { font-size: 13px; line-height: 1.6; }
-    .intro-text .highlight { font-size: 15px; margin-top: 4px; }
-    .btn-start { padding: 12px 46px; font-size: 15px; }
-    .footer-tip { margin-top: 10px; font-size: 11px; }
 }
 
 /* ===== 题目页 ===== */
