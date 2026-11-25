@@ -11,44 +11,96 @@ permalink: /projects/
   </header>
 
   <div class="page-content">
-    {% assign project_pages = site.pages | where_exp: "item", "item.path contains 'projects/' and item.path != 'projects/index.html' and item.name == 'index.html'" %}
-    {% assign project_files = site.static_files | where_exp: "item", "item.path contains '/projects/' and item.name == 'index.html'" %}
-    {% assign projects = project_pages | concat: project_files | sort: "path" %}
+    {% assign all_project_files = site.pages | concat: site.static_files | sort: "path" %}
+    {% assign processed_folders = "" | split: "," %}
+    {% assign has_projects = false %}
 
-    {% if projects.size > 0 %}
-      <div class="tools-grid">
-        {% for item in projects %}
-          {% assign relative_path = item.path | remove_first: "/projects/" | remove_first: "projects/" | remove: "/index.html" %}
-          {% if relative_path contains "/" or relative_path == "" %}
-            {% continue %}
+    <div class="projects-grid">
+    {% for item in all_project_files %}
+      {% assign raw_path = item.path | default: "" %}
+      {% assign path_prefix = raw_path | slice: 0, 9 %}
+      {% assign slash_path_prefix = raw_path | slice: 0, 10 %}
+
+      {% if path_prefix == "projects/" or slash_path_prefix == "/projects/" %}
+        {% assign relative_path = raw_path | remove_first: "/projects/" | remove_first: "projects/" %}
+        {% assign segments = relative_path | split: "/" %}
+        {% assign segment_count = segments | size %}
+
+        {% if segment_count == 2 and segments.first != "" and segments.last contains ".html" and relative_path != "index.html" %}
+        {% assign folder = segments.first %}
+        {% unless processed_folders contains folder %}
+          {% assign processed_folders = processed_folders | push: folder %}
+
+          {% assign best = nil %}
+          {% assign best_score = 0 %}
+
+          {% for candidate in all_project_files %}
+            {% assign candidate_raw_path = candidate.path | default: "" %}
+            {% assign candidate_prefix = candidate_raw_path | slice: 0, 9 %}
+            {% assign candidate_slash_prefix = candidate_raw_path | slice: 0, 10 %}
+
+            {% if candidate_prefix == "projects/" or candidate_slash_prefix == "/projects/" %}
+              {% assign candidate_relative = candidate_raw_path | remove_first: "/projects/" | remove_first: "projects/" %}
+              {% assign candidate_segments = candidate_relative | split: "/" %}
+              {% assign candidate_count = candidate_segments | size %}
+              {% assign candidate_folder = candidate_segments.first %}
+
+              {% if candidate_count == 2 and candidate_folder == folder and candidate_segments.last contains ".html" %}
+              {% assign filename = candidate_segments.last %}
+              {% assign folder_entry = folder | append: ".html" %}
+
+              {% if filename == "index.html" %}
+                {% assign score = 3 %}
+              {% elsif filename == folder_entry %}
+                {% assign score = 2 %}
+              {% else %}
+                {% assign score = 1 %}
+              {% endif %}
+
+              {% if score > best_score %}
+                {% assign best = candidate %}
+                {% assign best_score = score %}
+              {% endif %}
+              {% endif %}
+            {% endif %}
+          {% endfor %}
+
+          {% if best %}
+            {% assign has_projects = true %}
+            {% assign best_relative = best.path | default: "" | remove_first: "/projects/" | remove_first: "projects/" %}
+            {% assign best_segments = best_relative | split: "/" %}
+            {% assign best_filename = best_segments.last %}
+
+            {% assign fallback_title = folder | replace: "-", " " | replace: "_", " " | capitalize %}
+            {% assign title = best.title | default: fallback_title %}
+            {% assign description = best.description | default: "独立静态应用，点击进入。" %}
+            {% assign icon = best.icon | default: "📦" %}
+
+            {% if best.url %}
+              {% assign project_url = best.url | relative_url %}
+            {% else %}
+              {% assign project_url = "/projects/" | append: folder | append: "/" | append: best_filename | relative_url %}
+            {% endif %}
+
+            <a class="tool-card" href="{{ project_url }}">
+              <div class="tool-card-icon">{{ icon }}</div>
+              <div class="tool-card-content">
+                <h3 class="tool-card-title">{{ title | escape }}</h3>
+                <p class="tool-card-desc">{{ description | escape }}</p>
+              </div>
+              <div class="tool-card-arrow">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+              </div>
+            </a>
           {% endif %}
+        {% endunless %}
+        {% endif %}
+      {% endif %}
+    {% endfor %}
+    </div>
 
-          {% assign slug = relative_path %}
-          {% assign fallback_title = slug | replace: "-", " " | replace: "_", " " | capitalize %}
-          {% assign title = item.title | default: fallback_title %}
-          {% assign description = item.description | default: "独立静态应用，点击进入。" %}
-          {% assign icon = item.icon | default: "📦" %}
-
-          {% if item.url %}
-            {% assign project_url = item.url | relative_url %}
-          {% else %}
-            {% assign project_url = "/projects/" | append: slug | append: "/" | relative_url %}
-          {% endif %}
-
-          <a class="tool-card" href="{{ project_url }}">
-            <div class="tool-card-icon">{{ icon }}</div>
-            <div class="tool-card-content">
-              <h3 class="tool-card-title">{{ title | escape }}</h3>
-              <p class="tool-card-desc">{{ description | escape }}</p>
-            </div>
-            <div class="tool-card-arrow">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-            </div>
-          </a>
-        {% endfor %}
-      </div>
-    {% else %}
-      <p class="projects-empty">暂无项目。将静态网页文件夹放到 <code>projects/</code> 目录下即可在这里显示。</p>
-    {% endif %}
+    {% unless has_projects %}
+      <p class="projects-empty">暂无项目。将静态网页文件夹放到 <code>projects/</code> 目录下，并确保入口文件为 <code>index.html</code> 或与文件夹同名的 HTML 文件即可在这里显示。</p>
+    {% endunless %}
   </div>
 </article>
