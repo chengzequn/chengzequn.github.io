@@ -332,6 +332,11 @@ body {
   padding: 2rem 0;
 }
 
+/* 固定顶部导航预留空间，避免页面面包屑被遮挡 */
+.page {
+  padding-top: $header-height;
+}
+
 /* ========== 简历页面样式 ========== */
 .resume {
   max-width: 960px;
