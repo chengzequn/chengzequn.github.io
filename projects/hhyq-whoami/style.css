@@ -44,8 +44,17 @@ button { border: none; background: none; cursor: pointer; font-family: inherit; 
 /* ===== 启动页 ===== */
 .page-start {
     background: linear-gradient(180deg, #ffe8cc 0%, #f8c0c0 35%, #b0c4e8 70%, #8ab4d8 100%);
-    justify-content: center;
+    justify-content: flex-start;
     text-align: center;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+}
+.page-start::-webkit-scrollbar { width: 4px; }
+.page-start::-webkit-scrollbar-track { background: transparent; }
+.page-start::-webkit-scrollbar-thumb {
+    background: rgba(232, 88, 120, 0.35);
+    border-radius: 2px;
 }
 
 .show-tag {
@@ -63,6 +72,8 @@ button { border: none; background: none; cursor: pointer; font-family: inherit; 
 }
 
 .start-content {
+    width: 100%;
+    margin: auto 0;
     animation: startIn 1.2s cubic-bezier(.2,.8,.2,1) both;
 }
 @keyframes startIn {
