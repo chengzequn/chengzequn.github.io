@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" />
+<meta name="theme-color" content="#04080f" />
+<title>圣诞快乐 · Merry Christmas</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{
+    height:100%;overflow:hidden;background:#04080f;
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    -webkit-user-select:none;user-select:none;overscroll-behavior:none;
+  }
+  #app{
+    position:fixed;inset:0;overflow:hidden;touch-action:none;
+    background:radial-gradient(120% 85% at 50% 6%,#123055 0%,#0a1a2f 40%,#050b15 72%,#03060c 100%);
+  }
+  /* 极光背景 */
+  .aurora{
+    position:absolute;left:-25%;right:-25%;top:-18%;height:78%;pointer-events:none;
+    background:
+      radial-gradient(38% 55% at 30% 45%,rgba(38,214,166,.25),transparent 70%),
+      radial-gradient(35% 50% at 68% 35%,rgba(88,140,255,.22),transparent 72%),
+      radial-gradient(45% 55% at 52% 85%,rgba(255,186,110,.12),transparent 70%);
+    filter:blur(34px);
+    animation:aurora 16s ease-in-out infinite alternate;
+  }
+  @keyframes aurora{
+    from{transform:translate3d(-3%,0,0) scale(1);opacity:.8}
+    to{transform:translate3d(3%,3%,0) scale(1.14);opacity:1}
+  }
+  #bg,#fg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+  #bg{z-index:1}
+  #fg{z-index:7}
+
+  .stage{
+    position:relative;z-index:2;height:100%;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    padding:5vh 0 7vh;gap:.5vh;
+  }
+  .tree-wrap{
+    flex:1 1 auto;min-height:0;width:100%;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .tree-svg{height:100%;width:auto;max-width:96vw;overflow:visible}
+
+  .greeting{flex:0 0 auto;text-align:center;padding-bottom:1.5vh}
+  .greeting h1{
+    font-family:Georgia,"Times New Roman",serif;font-weight:600;
+    font-size:clamp(24px,7.6vw,44px);letter-spacing:.05em;line-height:1.08;
+    background:linear-gradient(180deg,#fffdf4 0%,#ffe4a1 38%,#f3b449 72%,#cf8b1f 100%);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    animation:titleGlow 4.2s ease-in-out infinite;
+  }
+  @keyframes titleGlow{
+    0%,100%{filter:drop-shadow(0 0 10px rgba(255,190,90,.28))}
+    50%{filter:drop-shadow(0 0 24px rgba(255,200,110,.62))}
+  }
+  .greeting p{
+    margin-top:1em;font-size:clamp(11px,3.2vw,14px);letter-spacing:.72em;text-indent:.72em;
+    color:#a9cde8;opacity:.78;
+  }
+
+  .hint{
+    position:absolute;left:0;right:0;bottom:max(14px,env(safe-area-inset-bottom));
+    z-index:8;text-align:center;font-size:12px;letter-spacing:.26em;text-indent:.26em;
+    color:#8fb8d8;opacity:.5;transition:opacity .6s ease;
+  }
+  .hint::before{
+    content:"";display:block;width:1px;height:20px;margin:0 auto 10px;
+    background:linear-gradient(180deg,transparent,#7fb0d6);
+    animation:beam 2.4s ease-in-out infinite;
+  }
+  @keyframes beam{0%,100%{opacity:.25;transform:scaleY(.7)}50%{opacity:.9;transform:scaleY(1)}}
+  .hint.hide{opacity:0}
+
+  /* SVG 动画 */
+  .tree-sway{transform-box:fill-box;transform-origin:50% 96%;animation:sway 8s ease-in-out infinite}
+  @keyframes sway{0%,100%{transform:rotate(-.55deg)}50%{transform:rotate(.55deg)}}
+  .tw{animation:twinkle 2.7s ease-in-out infinite}
+  @keyframes twinkle{0%,100%{opacity:1}50%{opacity:.3}}
+  .star-core{transform-box:fill-box;transform-origin:center;animation:starPulse 3.4s ease-in-out infinite}
+  @keyframes starPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.09)}}
+  .halo{animation:haloPulse 3.4s ease-in-out infinite}
+  @keyframes haloPulse{0%,100%{opacity:.55}50%{opacity:1}}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="aurora"></div>
+  <canvas id="bg"></canvas>
+
+  <div class="stage">
+    <div class="tree-wrap"></div>
+    <div class="greeting">
+      <h1>Merry Christmas</h1>
+      <p>圣 诞 快 乐</p>
+    </div>
+  </div>
+
+  <canvas id="fg"></canvas>
+  <div class="hint" id="hint">轻触屏幕 · 点亮星光</div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  var NS = 'http://www.w3.org/2000/svg';
+  var CX = 200;
+
+  function el(name, attrs) {
+    var e = document.createElementNS(NS, name);
+    if (attrs) { for (var k in attrs) { e.setAttribute(k, attrs[k]); } }
+    return e;
+  }
+
+  /* ---------------- 构建圣诞树 SVG ---------------- */
+  var svg = el('svg', {
+    viewBox: '0 0 400 580',
+    'class': 'tree-svg',
+    preserveAspectRatio: 'xMidYMid meet'
+  });
+
+  var defs = el('defs');
+  defs.innerHTML =
+    '<linearGradient id="tg1" x1="0" y1="0" x2="1" y2="0.35">' +
+      '<stop offset="0" stop-color="#0a3f2b"/><stop offset="0.28" stop-color="#1c7f52"/>' +
+      '<stop offset="0.52" stop-color="#33b171"/><stop offset="0.78" stop-color="#157a4c"/>' +
+      '<stop offset="1" stop-color="#062a1c"/>' +
+    '</linearGradient>' +
+    '<linearGradient id="tg2" x1="0" y1="0" x2="1" y2="0.35">' +
+      '<stop offset="0" stop-color="#0d4a32"/><stop offset="0.28" stop-color="#219059"/>' +
+      '<stop offset="0.52" stop-color="#3bc47e"/><stop offset="0.78" stop-color="#1a8b56"/>' +
+      '<stop offset="1" stop-color="#073524"/>' +
+    '</linearGradient>' +
+    '<linearGradient id="tg3" x1="0" y1="0" x2="1" y2="0.35">' +
+      '<stop offset="0" stop-color="#0f5539"/><stop offset="0.28" stop-color="#25a063"/>' +
+      '<stop offset="0.52" stop-color="#43d78b"/><stop offset="0.78" stop-color="#1e9a5f"/>' +
+      '<stop offset="1" stop-color="#0a4129"/>' +
+    '</linearGradient>' +
+    '<linearGradient id="trunkG" x1="0" y1="0" x2="1" y2="0">' +
+      '<stop offset="0" stop-color="#3a2317"/><stop offset="0.45" stop-color="#6b4227"/>' +
+      '<stop offset="1" stop-color="#2a1810"/>' +
+    '</linearGradient>' +
+    '<radialGradient id="snowG" cx="0.5" cy="0.5" r="0.5">' +
+      '<stop offset="0" stop-color="#eaf6ff" stop-opacity="0.55"/>' +
+      '<stop offset="0.55" stop-color="#bcdcf2" stop-opacity="0.22"/>' +
+      '<stop offset="1" stop-color="#8fb9d8" stop-opacity="0"/>' +
+    '</radialGradient>' +
+    '<radialGradient id="tierLight" cx="0.42" cy="0.22" r="0.85">' +
+      '<stop offset="0" stop-color="#c8ffe0" stop-opacity="0.22"/>' +
+      '<stop offset="0.55" stop-color="#8fe8bb" stop-opacity="0.05"/>' +
+      '<stop offset="1" stop-color="#000000" stop-opacity="0.12"/>' +
+    '</radialGradient>' +
+    '<linearGradient id="boxShade" x1="0" y1="0" x2="0" y2="1">' +
+      '<stop offset="0" stop-color="#ffffff" stop-opacity="0.16"/>' +
+      '<stop offset="0.55" stop-color="#000000" stop-opacity="0"/>' +
+      '<stop offset="1" stop-color="#000000" stop-opacity="0.38"/>' +
+    '</linearGradient>' +
+    '<radialGradient id="groundGlow">' +
+      '<stop offset="0" stop-color="#5affc0" stop-opacity="0.30"/>' +
+      '<stop offset="0.55" stop-color="#2bcf95" stop-opacity="0.12"/>' +
+      '<stop offset="1" stop-color="#2bcf95" stop-opacity="0"/>' +
+    '</radialGradient>' +
+    '<radialGradient id="starG" cx="0.5" cy="0.32" r="0.78">' +
+      '<stop offset="0" stop-color="#fffef8"/><stop offset="0.45" stop-color="#ffe59a"/>' +
+      '<stop offset="1" stop-color="#de9d26"/>' +
+    '</radialGradient>' +
+    '<radialGradient id="halo">' +
+      '<stop offset="0" stop-color="#ffd882" stop-opacity="0.85"/>' +
+      '<stop offset="0.42" stop-color="#ffbe5a" stop-opacity="0.26"/>' +
+      '<stop offset="1" stop-color="#ffbe5a" stop-opacity="0"/>' +
+    '</radialGradient>' +
+    '<radialGradient id="glowWarm"><stop offset="0" stop-color="#fff6d5" stop-opacity="0.95"/>' +
+      '<stop offset="1" stop-color="#fff6d5" stop-opacity="0"/></radialGradient>' +
+    '<radialGradient id="glowGold"><stop offset="0" stop-color="#ffd166" stop-opacity="0.95"/>' +
+      '<stop offset="1" stop-color="#ffd166" stop-opacity="0"/></radialGradient>' +
+    '<radialGradient id="glowRed"><stop offset="0" stop-color="#ff8a8a" stop-opacity="0.9"/>' +
+      '<stop offset="1" stop-color="#ff8a8a" stop-opacity="0"/></radialGradient>' +
+    '<radialGradient id="glowMint"><stop offset="0" stop-color="#a8ffd8" stop-opacity="0.9"/>' +
+      '<stop offset="1" stop-color="#a8ffd8" stop-opacity="0"/></radialGradient>' +
+    '<radialGradient id="bRed" cx="0.34" cy="0.26" r="0.8">' +
+      '<stop offset="0" stop-color="#ffb3b3"/><stop offset="0.35" stop-color="#ef4348"/>' +
+      '<stop offset="1" stop-color="#791220"/></radialGradient>' +
+    '<radialGradient id="bGold" cx="0.34" cy="0.26" r="0.8">' +
+      '<stop offset="0" stop-color="#fff6d8"/><stop offset="0.38" stop-color="#f5c24d"/>' +
+      '<stop offset="1" stop-color="#96650d"/></radialGradient>' +
+    '<radialGradient id="bBlue" cx="0.34" cy="0.26" r="0.8">' +
+      '<stop offset="0" stop-color="#dcefff"/><stop offset="0.38" stop-color="#5aa6ef"/>' +
+      '<stop offset="1" stop-color="#113c75"/></radialGradient>' +
+    '<radialGradient id="bSilver" cx="0.34" cy="0.26" r="0.8">' +
+      '<stop offset="0" stop-color="#ffffff"/><stop offset="0.4" stop-color="#cfe6f5"/>' +
+      '<stop offset="1" stop-color="#6d92ab"/></radialGradient>';
+  svg.appendChild(defs);
+
+  /* 地面光晕 + 积雪 */
+  svg.appendChild(el('ellipse', { cx: 200, cy: 512, rx: 158, ry: 30, fill: 'url(#groundGlow)' }));
+  svg.appendChild(el('ellipse', { cx: 200, cy: 516, rx: 188, ry: 26, fill: 'url(#snowG)' }));
+
+  var treeG = el('g', { 'class': 'tree-sway' });
+
+  /* 树干 */
+  treeG.appendChild(el('rect', { x: 185, y: 462, width: 30, height: 50, rx: 4, fill: 'url(#trunkG)' }));
+
+  /* 锯齿边缘轮廓 */
+  function branchPoints(top, bottom, halfW, n) {
+    var pts = [], i, t, y, base;
+    for (i = 1; i <= n; i++) {
+      t = i / n;
+      y = top + (bottom - top) * t;
+      base = halfW * Math.pow(t, 0.86);
+      if (i % 2 === 1) {
+        pts.push([CX + base, y + 9]);          /* 垂下的枝尖 */
+      } else {
+        pts.push([CX + base * 0.66, y - 2]);   /* 内凹的枝间 */
+      }
+    }
+    return pts;
+  }
+
+  function tierPath(top, bottom, halfW, n) {
+    var right = branchPoints(top, bottom, halfW, n), left = [], i, last;
+    for (i = 0; i < right.length; i++) {
+      left.push([2 * CX - right[i][0], right[i][1]]);
+    }
+    left.reverse();
+    last = right[right.length - 1];
+    var d = 'M ' + CX + ' ' + top;
+    for (i = 0; i < right.length; i++) d += ' L ' + right[i][0].toFixed(1) + ' ' + right[i][1].toFixed(1);
+    d += ' Q ' + CX + ' ' + (bottom + 15) + ' ' + left[0][0].toFixed(1) + ' ' + left[0][1].toFixed(1);
+    for (i = 1; i < left.length; i++) d += ' L ' + left[i][0].toFixed(1) + ' ' + left[i][1].toFixed(1);
+    return d + ' Z';
+  }
+
+  var tiers = [
+    { top: 135, bottom: 302, halfW: 106, n: 7, grad: 'url(#tg3)' },
+    { top: 212, bottom: 398, halfW: 152, n: 8, grad: 'url(#tg2)' },
+    { top: 312, bottom: 494, halfW: 198, n: 9, grad: 'url(#tg1)' }
+  ];
+
+  for (var ti = tiers.length - 1; ti >= 0; ti--) {
+    var T = tiers[ti];
+    var d = tierPath(T.top, T.bottom, T.halfW, T.n);
+    var cp = el('clipPath', { id: 'cp' + ti });
+    cp.appendChild(el('path', { d: d }));
+    defs.appendChild(cp);
+
+    treeG.appendChild(el('path', {
+      d: d, fill: T.grad,
+      stroke: 'rgba(150,255,205,0.18)', 'stroke-width': 1.4, 'stroke-linejoin': 'round'
+    }));
+
+    /* 边缘内阴影，制造厚度 */
+    treeG.appendChild(el('path', {
+      d: d, fill: 'none', stroke: 'rgba(3,32,21,0.5)', 'stroke-width': 14,
+      'clip-path': 'url(#cp' + ti + ')'
+    }));
+
+    /* 左上方受光 */
+    treeG.appendChild(el('path', {
+      d: d, fill: 'url(#tierLight)', 'clip-path': 'url(#cp' + ti + ')'
+    }));
+
+    /* 枝头积雪小点 */
+    var bp = branchPoints(T.top, T.bottom, T.halfW, T.n), k, side;
+    for (k = 0; k < bp.length; k++) {
+      if (k % 2 !== 0) continue;
+      for (side = -1; side <= 1; side += 2) {
+        treeG.appendChild(el('circle', {
+          cx: (CX + (bp[k][0] - CX) * side * 0.94).toFixed(1),
+          cy: (bp[k][1] - 2).toFixed(1),
+          r: 2, fill: '#eafff6', opacity: 0.4
+        }));
+      }
+    }
+  }
+
+  /* 彩灯串 */
+  var bulbColors = [
+    { core: '#fff6d5', glow: 'url(#glowWarm)' },
+    { core: '#ffd166', glow: 'url(#glowGold)' },
+    { core: '#ff8a8a', glow: 'url(#glowRed)' },
+    { core: '#a8ffd8', glow: 'url(#glowMint)' }
+  ];
+  var bulbIndex = 0;
+
+  function addBulb(parent, x, y, delay) {
+    var c = bulbColors[bulbIndex++ % bulbColors.length];
+    var g = el('g', { 'class': 'tw' });
+    g.style.animationDelay = delay.toFixed(2) + 's';
+    g.appendChild(el('circle', { cx: x, cy: y, r: 12, fill: c.glow, opacity: 0.45 }));
+    g.appendChild(el('circle', { cx: x, cy: y, r: 5.2, fill: c.glow, opacity: 0.5 }));
+    g.appendChild(el('circle', { cx: x, cy: y, r: 3.1, fill: c.core }));
+    g.appendChild(el('circle', { cx: x - 0.6, cy: y - 0.9, r: 1.2, fill: '#ffffff', opacity: 0.95 }));
+    parent.appendChild(g);
+  }
+
+  var garlands = [
+    { y: 418, w: 96, sag: 17, n: 9 },
+    { y: 334, w: 80, sag: 13, n: 8 },
+    { y: 256, w: 54, sag: 10, n: 6 }
+  ];
+
+  function qpoint(a, b, c, t) {
+    var mt = 1 - t;
+    return [
+      mt * mt * a[0] + 2 * mt * t * b[0] + t * t * c[0],
+      mt * mt * a[1] + 2 * mt * t * b[1] + t * t * c[1]
+    ];
+  }
+
+  for (var gi = 0; gi < garlands.length; gi++) {
+    var G = garlands[gi];
+    var a = [CX - G.w, G.y], b = [CX, G.y + G.sag], c = [CX + G.w, G.y];
+    var gp = 'M ' + a[0] + ' ' + a[1] + ' Q ' + b[0] + ' ' + b[1] + ' ' + c[0] + ' ' + c[1];
+    treeG.appendChild(el('path', {
+      d: gp, fill: 'none', stroke: 'rgba(255,214,140,0.28)',
+      'stroke-width': 1.6, 'stroke-linecap': 'round', 'stroke-dasharray': '1 7'
+    }));
+    for (var bi = 0; bi < G.n; bi++) {
+      var tt = 0.05 + (bi / (G.n - 1)) * 0.9;
+      var pt = qpoint(a, b, c, tt);
+      addBulb(treeG, +pt[0].toFixed(1), +(pt[1] - 2).toFixed(1), gi * 0.4 + bi * 0.19);
+    }
+  }
+
+  /* 挂饰 */
+  var ornaments = [
+    [158, 384, 'bRed', 10], [242, 364, 'bGold', 9], [196, 436, 'bBlue', 10.5],
+    [130, 452, 'bGold', 9], [268, 428, 'bRed', 9.5], [220, 300, 'bSilver', 8.5],
+    [170, 262, 'bRed', 8], [236, 238, 'bGold', 7.5], [200, 352, 'bSilver', 8]
+  ];
+  for (var oi = 0; oi < ornaments.length; oi++) {
+    var O = ornaments[oi];
+    var og = el('g', { 'class': 'tw' });
+    og.style.animationDelay = (0.3 + oi * 0.27).toFixed(2) + 's';
+    og.appendChild(el('circle', { cx: O[0], cy: O[1], r: O[3] * 1.7, fill: 'url(#glowGold)', opacity: 0.22 }));
+    og.appendChild(el('circle', { cx: O[0], cy: O[1], r: O[3], fill: 'url(#' + O[2] + ')' }));
+    og.appendChild(el('ellipse', {
+      cx: O[0] - O[3] * 0.3, cy: O[1] - O[3] * 0.34,
+      rx: O[3] * 0.26, ry: O[3] * 0.17, fill: '#ffffff', opacity: 0.75
+    }));
+    treeG.appendChild(og);
+  }
+
+  /* 顶部星星 */
+  function starPath(cx, cy, outer, inner, points) {
+    var d = '', i, r, ang, x, y;
+    for (i = 0; i < points * 2; i++) {
+      r = (i % 2 === 0) ? outer : inner;
+      ang = -Math.PI / 2 + i * Math.PI / points;
+      x = cx + Math.cos(ang) * r;
+      y = cy + Math.sin(ang) * r;
+      d += (i ? ' L ' : 'M ') + x.toFixed(2) + ' ' + y.toFixed(2);
+    }
+    return d + ' Z';
+  }
+
+  treeG.appendChild(el('circle', { cx: 200, cy: 108, r: 58, fill: 'url(#halo)', 'class': 'halo' }));
+  var starG = el('g', { 'class': 'star-core' });
+  starG.appendChild(el('path', { d: starPath(200, 108, 32, 13.5, 5), fill: 'url(#starG)' }));
+  starG.appendChild(el('path', {
+    d: starPath(200, 108, 32, 13.5, 5),
+    fill: 'none', stroke: 'rgba(255,240,190,0.55)', 'stroke-width': 1
+  }));
+  treeG.appendChild(starG);
+
+  svg.appendChild(treeG);
+
+  /* 礼物盒 */
+  function addGift(parent, x, y, w, h, bodyColor, lidColor, ribbonColor) {
+    var g = el('g');
+    g.appendChild(el('rect', { x: x, y: y, width: w, height: h, rx: 3, fill: bodyColor }));
+    g.appendChild(el('rect', { x: x, y: y, width: w, height: h, rx: 3, fill: 'url(#boxShade)' }));
+    g.appendChild(el('rect', { x: x - 2.5, y: y - 7, width: w + 5, height: 9, rx: 2.5, fill: lidColor }));
+    g.appendChild(el('rect', { x: x + w / 2 - 3.5, y: y - 7, width: 7, height: h + 7, fill: ribbonColor }));
+    g.appendChild(el('rect', { x: x, y: y + h * 0.42, width: w, height: 5, fill: ribbonColor, opacity: 0.9 }));
+    g.appendChild(el('ellipse', {
+      cx: x + w / 2 - 6.5, cy: y - 11, rx: 6, ry: 4.4, fill: ribbonColor,
+      transform: 'rotate(-20 ' + (x + w / 2 - 6.5) + ' ' + (y - 11) + ')'
+    }));
+    g.appendChild(el('ellipse', {
+      cx: x + w / 2 + 6.5, cy: y - 11, rx: 6, ry: 4.4, fill: ribbonColor,
+      transform: 'rotate(20 ' + (x + w / 2 + 6.5) + ' ' + (y - 11) + ')'
+    }));
+    g.appendChild(el('circle', { cx: x + w / 2, cy: y - 10, r: 2.6, fill: ribbonColor }));
+    parent.appendChild(g);
+  }
+
+  addGift(svg, 94, 466, 60, 46, '#b02a39', '#d8404f', '#f0c14b');
+  addGift(svg, 248, 472, 48, 40, '#1f6f6a', '#2f8d86', '#e8f1f8');
+  addGift(svg, 172, 486, 58, 26, '#c99a2e', '#e2b64a', '#c8353f');
+
+  document.querySelector('.tree-wrap').appendChild(svg);
+
+  /* ---------------- Canvas：星空 / 雪 / 流星 ---------------- */
+  var bgc = document.getElementById('bg');
+  var fgc = document.getElementById('fg');
+  var bctx = bgc.getContext('2d');
+  var fctx = fgc.getContext('2d');
+  var W = 0, H = 0, DPR = 1;
+  var stars = [], flakes = [], sparks = [], meteors = [];
+  var t = 0, last = performance.now(), meteorTimer = 3.5;
+
+  function rnd(a, b) { return a + Math.random() * (b - a); }
+
+  function makeStars() {
+    stars = [];
+    var count = Math.min(260, Math.round(W * H / 9000));
+    for (var i = 0; i < count; i++) {
+      stars.push({
+        x: rnd(0, W), y: rnd(0, H * 0.78), r: rnd(0.5, 1.8),
+        p: rnd(0, Math.PI * 2), s: rnd(0.7, 2.4), a: rnd(0.35, 1)
+      });
+    }
+  }
+
+  function makeFlakes() {
+    flakes = [];
+    var count = Math.min(300, Math.round(W * H / 5200));
+    for (var i = 0; i < count; i++) {
+      flakes.push({
+        x: rnd(0, W), y: rnd(0, H), r: rnd(1.2, 3.2),
+        vy: rnd(16, 54), vx: rnd(-9, 9),
+        ph: rnd(0, Math.PI * 2), sp: rnd(0.4, 1.3), a: rnd(0.45, 0.95)
+      });
+    }
+  }
+
+  function resize() {
+    DPR = Math.min(window.devicePixelRatio || 1, 2);
+    W = window.innerWidth;
+    H = window.innerHeight;
+    [bgc, fgc].forEach(function (c) {
+      c.width = Math.round(W * DPR);
+      c.height = Math.round(H * DPR);
+      c.style.width = W + 'px';
+      c.style.height = H + 'px';
+    });
+    bctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    fctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    makeStars();
+    makeFlakes();
+  }
+
+  function spawnMeteor() {
+    var toRight = Math.random() < 0.5;
+    var ang = (toRight ? 26 : 154) * Math.PI / 180;
+    meteors.push({
+      x: rnd(W * 0.15, W * 0.9), y: rnd(0, H * 0.3),
+      vx: Math.cos(ang) * 560, vy: Math.sin(ang) * 560,
+      life: 1.1, max: 1.1
+    });
+  }
+
+  function update(dt) {
+    t += dt;
+
+    for (var i = 0; i < flakes.length; i++) {
+      var f = flakes[i];
+      f.y += f.vy * dt;
+      f.x += Math.sin(t * f.sp + f.ph) * 14 * dt + f.vx * dt;
+      if (f.y > H + 8) { f.y = -8; f.x = rnd(0, W); }
+      if (f.x < -12) f.x = W + 12;
+      else if (f.x > W + 12) f.x = -12;
+    }
+
+    meteorTimer -= dt;
+    if (meteorTimer <= 0) { meteorTimer = rnd(7, 14); spawnMeteor(); }
+    for (var m = meteors.length - 1; m >= 0; m--) {
+      var mt = meteors[m];
+      mt.x += mt.vx * dt;
+      mt.y += mt.vy * dt;
+      mt.life -= dt;
+      if (mt.life <= 0) meteors.splice(m, 1);
+    }
+
+    for (var s = sparks.length - 1; s >= 0; s--) {
+      var sp = sparks[s];
+      sp.life -= dt;
+      if (sp.life <= 0) { sparks.splice(s, 1); continue; }
+      sp.x += sp.vx * dt;
+      sp.y += sp.vy * dt;
+      sp.vy += 70 * dt;
+      sp.vx *= 0.985;
+      sp.vy *= 0.985;
+    }
+  }
+
+  function drawBg() {
+    bctx.clearRect(0, 0, W, H);
+
+    /* 星星 */
+    bctx.globalCompositeOperation = 'lighter';
+    for (var i = 0; i < stars.length; i++) {
+      var s = stars[i];
+      var a = s.a * (0.55 + 0.45 * Math.sin(t * s.s + s.p));
+      bctx.beginPath();
+      bctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      bctx.fillStyle = 'rgba(214,235,255,' + a.toFixed(3) + ')';
+      bctx.fill();
+      if (s.r > 1.15) {
+        bctx.beginPath();
+        bctx.arc(s.x, s.y, s.r * 3.2, 0, Math.PI * 2);
+        bctx.fillStyle = 'rgba(160,205,255,' + (a * 0.08).toFixed(3) + ')';
+        bctx.fill();
+      }
+    }
+
+    /* 流星 */
+    for (var m = 0; m < meteors.length; m++) {
+      var mt = meteors[m];
+      var k = mt.life / mt.max;
+      var tx = mt.x - mt.vx * 0.15;
+      var ty = mt.y - mt.vy * 0.15;
+      var grad = bctx.createLinearGradient(tx, ty, mt.x, mt.y);
+      grad.addColorStop(0, 'rgba(180,220,255,0)');
+      grad.addColorStop(1, 'rgba(235,248,255,' + (0.85 * k).toFixed(3) + ')');
+      bctx.strokeStyle = grad;
+      bctx.lineWidth = 2;
+      bctx.lineCap = 'round';
+      bctx.beginPath();
+      bctx.moveTo(tx, ty);
+      bctx.lineTo(mt.x, mt.y);
+      bctx.stroke();
+    }
+    bctx.globalCompositeOperation = 'source-over';
+
+    /* 雪花 */
+    for (var j = 0; j < flakes.length; j++) {
+      var f = flakes[j];
+      bctx.beginPath();
+      bctx.arc(f.x, f.y, f.r, 0, Math.PI * 2);
+      bctx.fillStyle = 'rgba(240,250,255,' + f.a.toFixed(3) + ')';
+      bctx.fill();
+    }
+  }
+
+  function drawFg() {
+    fctx.clearRect(0, 0, W, H);
+    if (!sparks.length) return;
+    fctx.globalCompositeOperation = 'lighter';
+    for (var i = 0; i < sparks.length; i++) {
+      var sp = sparks[i];
+      var k = Math.max(0, sp.life / sp.max);
+      var g = fctx.createRadialGradient(sp.x, sp.y, 0, sp.x, sp.y, sp.r * 4);
+      g.addColorStop(0, 'rgba(255,255,255,' + (0.95 * k).toFixed(3) + ')');
+      g.addColorStop(0.35, 'rgba(' + sp.color + ',' + (0.7 * k).toFixed(3) + ')');
+      g.addColorStop(1, 'rgba(' + sp.color + ',0)');
+      fctx.fillStyle = g;
+      fctx.beginPath();
+      fctx.arc(sp.x, sp.y, sp.r * 4, 0, Math.PI * 2);
+      fctx.fill();
+    }
+    fctx.globalCompositeOperation = 'source-over';
+  }
+
+  function loop(now) {
+    var dt = Math.min((now - last) / 1000, 0.05);
+    last = now;
+    update(dt);
+    drawBg();
+    drawFg();
+    requestAnimationFrame(loop);
+  }
+
+  /* 点击爆发星光 */
+  var palette = ['255,236,180', '255,209,102', '168,255,216', '140,200,255'];
+  function burst(x, y) {
+    for (var i = 0; i < 30; i++) {
+      var ang = rnd(0, Math.PI * 2);
+      var spd = rnd(50, 250);
+      sparks.push({
+        x: x, y: y,
+        vx: Math.cos(ang) * spd,
+        vy: Math.sin(ang) * spd - 40,
+        r: rnd(0.9, 2.4),
+        life: rnd(0.7, 1.5),
+        max: 1.5,
+        color: palette[Math.floor(Math.random() * palette.length)]
+      });
+    }
+  }
+
+  var hint = document.getElementById('hint');
+  window.addEventListener('pointerdown', function (e) {
+    burst(e.clientX, e.clientY);
+    if (hint && !hint.classList.contains('hide')) hint.classList.add('hide');
+  });
+
+  window.addEventListener('resize', resize);
+  window.addEventListener('orientationchange', function () { setTimeout(resize, 180); });
+
+  resize();
+  requestAnimationFrame(function (n) { last = n; loop(n); });
+})();
+</script>
+</body>
+</html>
