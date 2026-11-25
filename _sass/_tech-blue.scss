@@ -5021,6 +5021,16 @@ ul.contact-list {
   transition: all 0.25s ease;
 }
 
+.projects-empty {
+  margin: 2rem 0 0;
+  padding: 2rem;
+  border: 1px dashed $border-color;
+  border-radius: $radius-md;
+  background-color: $card-background;
+  color: $text-secondary;
+  text-align: center;
+}
+
 /* ========================================
    SVG 转 PNG 工具页
    ======================================== */

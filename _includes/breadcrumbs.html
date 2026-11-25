@@ -19,6 +19,15 @@
       <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
         <span itemprop="name" aria-current="page">{{ page.title | escape }}</span>
       </li>
+    {% elsif page.url contains "/projects/" and page.url != "/projects/" %}
+      <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="{{ "/projects/" | absolute_url }}">
+          <span itemprop="name">项目</span>
+        </a>
+      </li>
+      <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <span itemprop="name" aria-current="page">{{ page.title | escape }}</span>
+      </li>
     {% else %}
       <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
         <span itemprop="name" aria-current="page">{{ page.title | escape }}</span>

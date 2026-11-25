@@ -123,6 +123,7 @@ page_paths:
   - about.markdown
   - resume.html
   - tools.html
+  - projects/index.html
   - nav.html
   - friends.html
   - benefits.html

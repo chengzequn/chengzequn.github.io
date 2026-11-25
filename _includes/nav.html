@@ -36,7 +36,7 @@
           </ul>
         </li>
         <li class="dropdown">
-          <a class="nav-link dropdown-toggle {% if page.url contains "about" or page.url contains "tools" or page.url contains "nav" or page.url contains "friends" or page.url contains "benefits" or page.url contains "services" %}active{% endif %}" href="#" onclick="return false;">
+          <a class="nav-link dropdown-toggle {% if page.url contains "about" or page.url contains "tools" or page.url contains "projects" or page.url contains "nav" or page.url contains "friends" or page.url contains "benefits" or page.url contains "services" %}active{% endif %}" href="#" onclick="return false;">
             我的
             <span class="nav-link-underline"></span>
           </a>
@@ -46,6 +46,9 @@
             </li>
             <li>
               <a class="dropdown-link" href="{{ "/tools" | relative_url }}">工具</a>
+            </li>
+            <li>
+              <a class="dropdown-link" href="{{ "/projects" | relative_url }}">项目</a>
             </li>
             <li>
               <a class="dropdown-link" href="{{ "/nav" | relative_url }}">导航</a>
@@ -110,6 +113,9 @@
     </li>
     <li>
       <a class="mobile-nav-link {% if page.url contains "tools" %}active{% endif %}" href="{{ "/tools" | relative_url }}">工具</a>
+    </li>
+    <li>
+      <a class="mobile-nav-link {% if page.url contains "projects" %}active{% endif %}" href="{{ "/projects" | relative_url }}">项目</a>
     </li>
     <li>
       <a class="mobile-nav-link {% if page.url contains "nav" %}active{% endif %}" href="{{ "/nav" | relative_url }}">导航</a>

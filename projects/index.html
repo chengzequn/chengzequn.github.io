@@ -1,0 +1,54 @@
+---
+layout: default
+title: 项目
+permalink: /projects/
+---
+
+<article class="page h-entry">
+  <header class="page-header">
+    {% include breadcrumbs.html %}
+    <h1 class="page-title p-name" itemprop="name headline">{{ page.title | escape }}</h1>
+  </header>
+
+  <div class="page-content">
+    {% assign project_pages = site.pages | where_exp: "item", "item.path contains 'projects/' and item.path != 'projects/index.html' and item.name == 'index.html'" %}
+    {% assign project_files = site.static_files | where_exp: "item", "item.path contains '/projects/' and item.name == 'index.html'" %}
+    {% assign projects = project_pages | concat: project_files | sort: "path" %}
+
+    {% if projects.size > 0 %}
+      <div class="tools-grid">
+        {% for item in projects %}
+          {% assign relative_path = item.path | remove_first: "/projects/" | remove_first: "projects/" | remove: "/index.html" %}
+          {% if relative_path contains "/" or relative_path == "" %}
+            {% continue %}
+          {% endif %}
+
+          {% assign slug = relative_path %}
+          {% assign fallback_title = slug | replace: "-", " " | replace: "_", " " | capitalize %}
+          {% assign title = item.title | default: fallback_title %}
+          {% assign description = item.description | default: "独立静态应用，点击进入。" %}
+          {% assign icon = item.icon | default: "📦" %}
+
+          {% if item.url %}
+            {% assign project_url = item.url | relative_url %}
+          {% else %}
+            {% assign project_url = "/projects/" | append: slug | append: "/" | relative_url %}
+          {% endif %}
+
+          <a class="tool-card" href="{{ project_url }}">
+            <div class="tool-card-icon">{{ icon }}</div>
+            <div class="tool-card-content">
+              <h3 class="tool-card-title">{{ title | escape }}</h3>
+              <p class="tool-card-desc">{{ description | escape }}</p>
+            </div>
+            <div class="tool-card-arrow">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+            </div>
+          </a>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="projects-empty">暂无项目。将静态网页文件夹放到 <code>projects/</code> 目录下即可在这里显示。</p>
+    {% endif %}
+  </div>
+</article>
