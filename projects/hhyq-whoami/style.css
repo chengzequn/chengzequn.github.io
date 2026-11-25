@@ -212,7 +212,13 @@ button { border: none; background: none; cursor: pointer; font-family: inherit; 
     font-weight: 500;
 }
 
-.question-box { flex: 1; width: 100%; display: flex; flex-direction: column; }
+.question-box {
+    flex: 1;
+    width: 100%;
+    min-height: 0;
+    display: flex; flex-direction: column;
+    overflow: hidden;
+}
 .question-title {
     font-size: 22px;
     line-height: 1.5;
@@ -227,7 +233,21 @@ button { border: none; background: none; cursor: pointer; font-family: inherit; 
     to { opacity: 1; transform: translateX(0); }
 }
 
-.options-list { display: flex; flex-direction: column; gap: 14px; }
+.options-list {
+    flex: 1;
+    min-height: 0;
+    display: flex; flex-direction: column; gap: 14px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    padding: 2px 2px 4px;
+}
+.options-list::-webkit-scrollbar { width: 4px; }
+.options-list::-webkit-scrollbar-track { background: transparent; }
+.options-list::-webkit-scrollbar-thumb {
+    background: rgba(232, 88, 120, 0.4);
+    border-radius: 2px;
+}
 .option-item {
     position: relative;
     padding: 18px 22px;
@@ -249,7 +269,12 @@ button { border: none; background: none; cursor: pointer; font-family: inherit; 
     box-shadow: 0 4px 20px rgba(255,88,120,0.2);
 }
 
-.quiz-nav { width: 100%; display: flex; gap: 12px; padding-top: 16px; }
+.quiz-nav {
+    width: 100%;
+    flex-shrink: 0;
+    display: flex; gap: 12px;
+    padding-top: 16px;
+}
 .btn-nav {
     flex: 1;
     padding: 14px;

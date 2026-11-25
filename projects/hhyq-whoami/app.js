@@ -305,6 +305,7 @@ function renderQuestion() {
 
     const list = $('#optionsList');
     list.innerHTML = '';
+    list.scrollTop = 0;
     q.options.forEach((opt, i) => {
         const btn = document.createElement('button');
         btn.className = 'option-item' + (app.answers[idx] === i ? ' selected' : '');
