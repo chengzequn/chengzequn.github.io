@@ -1,0 +1,133 @@
+---
+title: "测测你是《谷雨》里的谁"
+description: "十道题，测测你在电视剧《谷雨》里像谁：欧阳煦、严平安、周海洋、谭宝仪、李阿红、林如意"
+icon: "🌧️"
+---
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>测测你是《谷雨》里的谁？</title>
+    <meta name="description" content="十道题，测测你在电视剧《谷雨》里像谁：欧阳煦、严平安、周海洋、谭宝仪、李阿红、林如意。">
+    <link rel="stylesheet" href="style.css?v=1">
+</head>
+<body>
+    <!-- 雨夜粒子背景 -->
+    <canvas id="particles"></canvas>
+
+    <div class="app" id="app">
+
+        <!-- 启动页 -->
+        <section class="page page-start active" id="pageStart">
+            <div class="start-content">
+                <div class="show-tag">电视剧《谷雨》</div>
+                <div class="poster">
+                    <div class="poster-inner">
+                        <h1 class="title-main">谷雨</h1>
+                        <p class="title-sub">GU YU · 2026</p>
+                        <div class="poster-divider"></div>
+                        <p class="tagline">「雨落之后，秘密仍在」</p>
+                    </div>
+                </div>
+                <div class="intro-text">
+                    <p>六位角色</p>
+                    <p>一场盘根错节的局</p>
+                    <p>从春江到北京，真相与人心</p>
+                    <p class="highlight">你像他们中的谁？</p>
+                </div>
+                <button class="btn-start" id="btnStart">
+                    <span>开始测试</span>
+                    <div class="btn-pulse"></div>
+                </button>
+                <p class="footer-tip">共 10 道题 · 约 1 分钟完成</p>
+            </div>
+        </section>
+
+        <!-- 题目页 -->
+        <section class="page page-quiz" id="pageQuiz">
+            <div class="quiz-header">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <span class="progress-text"><span id="currentNum">1</span> / <span id="totalNum">10</span></span>
+            </div>
+
+            <div class="question-box" id="questionBox">
+                <h2 class="question-title" id="questionTitle"></h2>
+                <div class="options-list" id="optionsList"></div>
+            </div>
+
+            <div class="quiz-nav">
+                <button class="btn-nav" id="btnPrev" disabled>上一题</button>
+                <button class="btn-nav btn-next" id="btnNext" disabled>下一题</button>
+            </div>
+        </section>
+
+        <!-- 加载动画 -->
+        <section class="page page-loading" id="pageLoading">
+            <div class="loading-wrap">
+                <div class="road">
+                    <div class="car"></div>
+                    <div class="road-line"></div>
+                </div>
+                <div class="loading-text">
+                    <p>正在查账...</p>
+                    <p class="loading-dots">看看你在局里是谁</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 结果页 -->
+        <section class="page page-result" id="pageResult">
+            <div class="result-bg"></div>
+            <div class="result-content">
+                <p class="result-label">你像《谷雨》里的</p>
+                <h1 class="result-name" id="resultName"></h1>
+                <div class="result-avatar" id="resultAvatar"></div>
+                <div class="result-desc" id="resultDesc"></div>
+                <div class="result-quote" id="resultQuote"></div>
+
+                <!-- 性格雷达图 -->
+                <div class="radar-wrap">
+                    <canvas id="radarChart" width="260" height="260"></canvas>
+                </div>
+
+                <div class="result-actions">
+                    <button class="btn-primary btn-again" id="btnAgain">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 4v6h6"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+                        再测一次
+                    </button>
+                    <button class="btn-primary btn-invite" id="btnInvite">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                        邀请好友
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 邀请弹窗 -->
+        <div class="modal" id="inviteModal">
+            <div class="modal-mask"></div>
+            <div class="modal-content">
+                <h3>🎁 分享你的角色卡</h3>
+                <p>长按图片保存，发给好友一起测！</p>
+                <div class="poster-preview" id="posterPreview"></div>
+                <div class="share-btns">
+                    <button class="btn-save" id="btnSave">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        保存图片
+                    </button>
+                    <button class="btn-close" id="btnCloseModal">关闭</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 提示toast -->
+        <div class="toast" id="toast"></div>
+
+    </div>
+
+    <script src="app.js?v=1"></script>
+</body>
+</html>
